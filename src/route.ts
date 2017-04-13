@@ -15,9 +15,9 @@ export interface SwaggerRouteContainer {
  *
  * @param schema a tyranid collection schema definition object
  */
-export async function route(
+export function route(
   schema: Tyr.CollectionDefinitionHydrated,
-): Promise<SwaggerRouteContainer> {
+): SwaggerRouteContainer {
   const out = {
     name: '',
     route: {}

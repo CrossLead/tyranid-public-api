@@ -1,4 +1,5 @@
 import { Tyr } from 'tyranid';
+import { pascalCase } from './utils';
 
 /**
  * container object for a generated swagger definition
@@ -15,14 +16,13 @@ export interface SwaggerDefinitionContainer {
  *
  * @param schema a tyranid collection schema definition object
  */
-export async function definition(
+export function definition(
   schema: Tyr.CollectionDefinitionHydrated,
-): Promise<SwaggerDefinitionContainer> {
+): SwaggerDefinitionContainer {
   const out = {
-    name: '',
+    name: pascalCase(schema.name),
     definition: {}
   };
-
 
   return out;
 }
