@@ -3,12 +3,13 @@ import { Tyr } from 'tyranid';
 import * as path from 'path';
 
 
-test.before(async () => {
+test.before(async (t) => {
   await Tyr.config({
     validate: [
       { glob: path.join(__dirname, './models/*.js') }
     ]
   });
+  t.truthy(Tyr.collections.length);
 });
 
 
