@@ -4,7 +4,8 @@
   "description": "Swagger API spec generator for tyranid",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && npm run ava",
+    "ava": "ava",
     "build": "tsc",
     "watch": "tsc -w"
   },
@@ -16,7 +17,7 @@
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/node": "7.0.12",
+    "@types/node": "6.0.68",
     "ava": "0.19.1",
     "tslint": "5.1.0",
     "typescript": "2.2.2",
@@ -24,5 +25,10 @@
   },
   "peerDependencies": {
     "tyranid": "^0.1.45"
+  },
+  "ava": {
+    "files": [
+      "dist/test/index.js"
+    ]
   }
 }

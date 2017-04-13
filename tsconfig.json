@@ -6,7 +6,10 @@
     "strictNullChecks": true,
     "alwaysStrict": true,
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "lib": [
+      "es2015"
+    ]
   },
   "include": [
     "src"
