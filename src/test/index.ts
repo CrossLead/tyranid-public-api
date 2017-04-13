@@ -1,10 +1,10 @@
 import test from 'ava';
 import { Tyr } from 'tyranid';
-import * as path from 'path';
+import { join } from 'path';
 
 import {
-  route,
-  definition,
+  path,
+  schema,
   generate
 } from '../';
 
@@ -14,7 +14,7 @@ import {
 test.before(async (t) => {
   await Tyr.config({
     validate: [
-      { glob: path.join(__dirname, './models/*.js') }
+      { glob: join(__dirname, './models/*.js') }
     ]
   });
   t.truthy(Tyr.collections.length);
@@ -23,6 +23,6 @@ test.before(async (t) => {
 
 
 test('should generate correct definition from schema', async (t) => {
-  const def = definition(Tyr.byName['user'].def);
+  const def = schema(Tyr.byName['user'].def);
   t.deepEqual(def.name, 'User');
 });

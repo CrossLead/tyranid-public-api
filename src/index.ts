@@ -1,3 +1,3 @@
-export * from './definition';
+export * from './schema';
 export * from './generate';
-export * from './route';
+export * from './path';
