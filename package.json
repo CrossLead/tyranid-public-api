@@ -4,7 +4,7 @@
   "description": "Swagger API spec generator for tyranid",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run build && npm run ava",
+    "test": "bash -c \"rm -rf ./dist/ && npm run build && npm run ava\"",
     "ava": "ava",
     "build": "tsc",
     "watch": "tsc -w"
