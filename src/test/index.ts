@@ -8,6 +8,10 @@ import {
   generate
 } from '../';
 
+import {
+  pascalCase
+} from '../utils';
+
 /**
  * boot tyranid without db
  */
@@ -20,6 +24,11 @@ test.before(async (t) => {
   t.truthy(Tyr.collections.length);
 });
 
+
+test('pascalCase should return correct values', (t) => {
+  t.is(pascalCase('my short sentence'), 'MyShortSentence');
+  t.is(pascalCase('my_snake_sentence'), 'MySnakeSentence');
+});
 
 
 test('should generate correct definition from schema', async (t) => {

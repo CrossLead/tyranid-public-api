@@ -33,7 +33,6 @@
     ]
   },
   "dependencies": {
-    "@types/swagger-schema-official": "2.0.2",
-    "lodash": "4.17.4"
+    "@types/swagger-schema-official": "2.0.2"
   }
 }
