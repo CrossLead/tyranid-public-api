@@ -1,0 +1,33 @@
+{
+  "name": "tyranid-public-api",
+  "version": "0.0.0",
+  "description": "Express API generator for tyranid",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "keywords": [
+    "tyranid",
+    "express",
+    "passport",
+    "api"
+  ],
+  "author": "bsouthga@gmail.com",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/express": "4.0.35",
+    "@types/node": "7.0.12",
+    "@types/passport": "0.3.3",
+    "tslint": "5.1.0",
+    "typescript": "2.2.2"
+  },
+  "peerDependencies": {
+    "tyranid": "^0.1.45"
+  },
+  "dependencies": {
+    "express": "4.15.2",
+    "passport": "0.3.2"
+  }
+}
