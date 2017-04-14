@@ -1,3 +1,4 @@
 export * from './schema';
-export * from './generate';
+export * from './spec';
 export * from './path';
+export * from './utils';

@@ -109,9 +109,10 @@ function swaggerType(
     case 'array': {
       const subfields = field.of;
       if (!subfields) {
-        return error(
-          `field "${path}" is of type \`array\` but missing an \`of\` property`
-        );
+        return error(`
+          field "${path}" is of type \`array\`
+          but missing an \`of\` property
+        `);
       }
 
       schemaObj = {

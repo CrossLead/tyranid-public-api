@@ -3,9 +3,9 @@ import { join } from 'path';
 import { Tyr } from 'tyranid';
 
 import {
-  generate,
   path,
   schema,
+  spec,
 } from '../';
 
 import {
@@ -38,4 +38,11 @@ test('should generate correct definition from schema', async (t) => {
 test('should generate correct definition from schema with nesting', async (t) => {
   const s = schema(Tyr.byName.test.def);
   t.deepEqual(s.name, 'Test');
+  t.deepEqual(s.schema.properties!.nestedMapArray.type, 'array');
+});
+
+test('should generate correct definition from schema with nesting', async (t) => {
+  const s = spec(Tyr);
+  console.log(yaml(s));
+  t.pass();
 });
