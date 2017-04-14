@@ -30,7 +30,7 @@ export function pascalCase(str: string) {
  * @param message message to throw
  */
 export function error(message: string): never {
-  throw new Error(`tyranid-swagger: ${message}`);
+  throw new Error(`tyranid-swagger: ${message.replace(/\s+/g, ' ')}`);
 }
 
 

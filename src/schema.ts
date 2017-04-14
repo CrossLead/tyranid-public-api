@@ -27,7 +27,7 @@ export function schema(
     name,
     schema: {
       type: 'object',
-      properties: swaggerObject(name, def.fields)
+      properties: swaggerObject(def.fields)
     }
   };
 
@@ -37,95 +37,160 @@ export function schema(
 
 
 /**
- * Translate a set of tyranid fields to a swagger object definition
+ * Convert hash of tyranid fields to hash of swagger schema
  *
- * @param path property path in schema of current field hash
- * @param fields tyranid schema field hash
+ * @param fields hash of tyranid field instances
  */
 function swaggerObject(
-  path: string,
-  fields: { [key: string]: Tyr.FieldInstance }
+  fields: { [key: string]: Tyr.FieldInstance },
+  path?: string
 ) {
   const properties: { [key: string]: Schema } = {};
+  for (const field in fields) {
+    properties[field] = swaggerType(
+      fields[field],
+      field + (path ? `.${path}` : '')
+    );
+  }
 
-  for (const name in fields) {
-    const field = fields[name];
+  return properties;
+}
 
-    if (!field) return error(`no \`def\` property on field: ${path}.${name}`);
+
+
+/**
+ * Translate a set of tyranid field to a swagger definition
+ *
+ * @param path property path in schema of current field hash
+ * @param field tyranid schema field
+ */
+function swaggerType(
+  field: Tyr.FieldInstance,
+  path: string
+) {
+  if (!field) return error(`no \`def\` property on field: ${path}`);
+
+  /**
+   * TODO: should links be refs?
+   */
+  const type = field.def.link
+    ? 'string'
+    : field.def.is;
+
+  let schemaObj: Schema;
+
+  switch (type) {
 
     /**
-     * TODO: should links be refs?
+     * pass through types from tyranid
      */
-    const type = field.def.link
-      ? 'string'
-      : field.def.is;
+    case 'password':
+    case 'boolean':
+    case 'integer':
+    case 'double':
+    case 'string':
+    case 'date': {
+      schemaObj = { type };
+      break;
+    }
 
-    switch (type) {
+    /**
+     * string aliases
+     */
+    case 'mongoid':
+    case 'email': {
+      schemaObj = { type: 'string' };
+      break;
+    }
+
+    /**
+     * array types
+     */
+    case 'array': {
+      const subfields = field.of;
+      if (!subfields) {
+        return error(
+          `field "${path}" is of type \`array\` but missing an \`of\` property`
+        );
+      }
+
+      schemaObj = {
+        type: 'array',
+        items: swaggerType(subfields, `${path}._`)
+      }
+      break;
+    }
+
+    /**
+     * nested objects
+     */
+    case 'object': {
+      const keys = field.keys;
+      const values = field.of;
+      const subfields = field.fields;
+
+      schemaObj = {
+        type: 'object'
+      }
+
 
       /**
-       * pass through types from tyranid
+       * if the sub object is a hash
        */
-      case 'password':
-      case 'boolean':
-      case 'integer':
-      case 'double':
-      case 'string':
-      case 'date': {
-        properties[name] = { type };
+      if (keys) {
+        if (!values) {
+          return error(`
+            field "${path}" is of type \`object\` and has a keys
+            property but no values property.
+          `);
+        }
+
+        // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
+        // pull in new typings and remove any cast.
+        /* tslint:disable */
+        (<any> schemaObj).additionalProperties = swaggerType(values, path);
+        /* tslint:enable */
+
         break;
       }
 
       /**
-       * string aliases
+       * if the sub object has a defined schema
        */
-      case 'mongoid':
-      case 'email': {
-        properties[name] = { type: 'string' };
-        break;
+      if (!subfields) {
+        return error(
+          `field "${path}" is of type \`object\` but
+          has no \`fields\` property`
+        );
       }
 
-      /**
-       * array types
-       */
-      case 'array': {
-        const subfields = field.of && field.of.fields;
-        if (!subfields) {
-          return error(
-            `field "${path}.${name}" is of type \`array\` but missing an \`of\` property`
-          );
-        }
+      schemaObj.items = swaggerObject(subfields, path);
 
-        properties[name] = {
-          type: 'array',
-          items: swaggerObject(`${path}.${name}`, subfields)
-        }
-        break;
-      }
+      break;
+    }
 
 
-      /**
-       * nested objects
-       */
-      case 'object': {
-        const subfields = field.fields;
-        if (!subfields) {
-          return error(
-            `field "${path}.${name}" is of type \`object\` but has no \`fields\` property`
-          );
-        }
+    default: return error(`field "${path}" is of unsupported type: ${type}`);
+  }
 
-        properties[name] = {
-          type: 'array',
-          items: swaggerObject(`${path}.${name}`, subfields)
-        }
-        break;
-      }
+  /**
+   * add formats
+   */
+  switch (schemaObj.type) {
 
-
-      default: return error(`field "${path}.${name}" is of unsupported type: ${type}`);
+    case 'integer': {
+      schemaObj.format = 'i32';
+      break;
     }
 
   }
 
-  return properties;
+  /**
+   * add note from schema
+   */
+  if (field.def.note) {
+    schemaObj.description = field.def.note;
+  }
+
+  return schemaObj;
 }
