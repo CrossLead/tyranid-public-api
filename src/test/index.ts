@@ -32,6 +32,6 @@ test('pascalCase should return correct values', (t) => {
 
 
 test('should generate correct definition from schema', async (t) => {
-  const def = schema(Tyr.byName['user'].def);
-  t.deepEqual(def.name, 'User');
+  const s = schema(Tyr.byName['user'].def);
+  t.deepEqual(s.name, 'User');
 });

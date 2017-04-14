@@ -18,3 +18,14 @@ export function pascalCase(str: string) {
 
   return out;
 }
+
+
+
+/**
+ * Throw error with library prefix
+ *
+ * @param message message to throw
+ */
+export function error(message: string): never {
+  throw new Error(`tyranid-swagger: ${message}`);
+}
