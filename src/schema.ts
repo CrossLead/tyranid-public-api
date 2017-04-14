@@ -91,7 +91,7 @@ function swaggerObject(
         const subfields = field.of && field.of.fields;
         if (!subfields) {
           return error(
-            `field "${name}" is of type \`array\` but missing an \`of\` property`
+            `field "${path}.${name}" is of type \`array\` but missing an \`of\` property`
           );
         }
 
@@ -110,7 +110,7 @@ function swaggerObject(
         const subfields = field.fields;
         if (!subfields) {
           return error(
-            `field "${name}" is of type \`object\` but has no \`fields\` property`
+            `field "${path}.${name}" is of type \`object\` but has no \`fields\` property`
           );
         }
 
@@ -122,7 +122,7 @@ function swaggerObject(
       }
 
 
-      default: return error(`unsupported type: ${type}`);
+      default: return error(`field "${path}.${name}" is of unsupported type: ${type}`);
     }
 
   }
