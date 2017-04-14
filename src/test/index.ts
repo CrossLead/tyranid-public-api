@@ -1,15 +1,16 @@
 import test from 'ava';
-import { Tyr } from 'tyranid';
 import { join } from 'path';
+import { Tyr } from 'tyranid';
 
 import {
+  generate,
   path,
   schema,
-  generate
 } from '../';
 
 import {
-  pascalCase
+  pascalCase,
+  yaml,
 } from '../utils';
 
 /**
@@ -18,20 +19,19 @@ import {
 test.before(async (t) => {
   await Tyr.config({
     validate: [
-      { glob: join(__dirname, './models/*.js') }
-    ]
+      { glob: join(__dirname, './models/*.js') },
+    ],
   });
   t.truthy(Tyr.collections.length);
 });
-
 
 test('pascalCase should return correct values', (t) => {
   t.is(pascalCase('my short sentence'), 'MyShortSentence');
   t.is(pascalCase('my_snake_sentence'), 'MySnakeSentence');
 });
 
-
 test('should generate correct definition from schema', async (t) => {
-  const s = schema(Tyr.byName['user'].def);
+  const s = schema(Tyr.byName.user.def);
   t.deepEqual(s.name, 'User');
+  console.log(yaml(s));
 });

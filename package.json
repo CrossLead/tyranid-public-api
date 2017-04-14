@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "description": "Swagger API spec generator for tyranid",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "test": "bash -c \"rm -rf ./dist/ && npm run build && npm run ava\"",
+    "test": "bash -c \"rm -rf ./dist/ && npm run build && npm run lint && npm run ava\"",
     "ava": "ava",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "lint": "tslint --fix ./src/**/*.ts"
   },
   "keywords": [
     "tyranid",
@@ -16,6 +18,13 @@
   ],
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
+  "dependencies": {
+    "@types/swagger-schema-official": "2.0.2",
+    "js-yaml": "3.8.3"
+  },
+  "peerDependencies": {
+    "tyranid": "^0.1.45"
+  },
   "devDependencies": {
     "@types/js-yaml": "3.5.29",
     "@types/lodash": "4.14.62",
@@ -25,16 +34,9 @@
     "typescript": "2.2.2",
     "tyranid": "0.1.45"
   },
-  "peerDependencies": {
-    "tyranid": "^0.1.45"
-  },
   "ava": {
     "files": [
       "dist/test/index.js"
     ]
-  },
-  "dependencies": {
-    "@types/swagger-schema-official": "2.0.2",
-    "js-yaml": "3.8.3"
   }
 }

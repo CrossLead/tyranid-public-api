@@ -1,3 +1,6 @@
+import { safeDump } from 'js-yaml';
+
+
 /**
  * Convert a string to PascalCase
  *
@@ -28,4 +31,17 @@ export function pascalCase(str: string) {
  */
 export function error(message: string): never {
   throw new Error(`tyranid-swagger: ${message}`);
+}
+
+
+
+/**
+ * Convert object to yaml
+ *
+ * @param obj js object
+ */
+export function yaml(obj: object) {
+  return safeDump(obj, {
+    sortKeys: true
+  });
 }
