@@ -148,7 +148,7 @@ function swaggerType(
         // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
         // pull in new typings and remove any cast.
         /* tslint:disable */
-        (<any> schemaObj).additionalProperties = swaggerType(values, path);
+        (<any> schemaObj).additionalProperties = swaggerType(values, `${path}.[key: string]`);
         /* tslint:enable */
 
         break;
