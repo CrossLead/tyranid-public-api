@@ -9,6 +9,7 @@
         ],
         "no-console": [
             false
-        ]
+        ],
+        "no-any": true
     }
 }
