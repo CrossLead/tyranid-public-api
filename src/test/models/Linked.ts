@@ -4,8 +4,6 @@ export default new Tyr.Collection({
   id: 't01',
   name: 'linked',
   dbName: 'linked',
-  swagger: {
-    public: true
-  },
+  swagger: true,
   fields: { _id: { is: 'mongoid' }, name: { is: 'string' } }
 });

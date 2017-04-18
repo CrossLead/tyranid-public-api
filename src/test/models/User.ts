@@ -4,9 +4,7 @@ export default new Tyr.Collection({
   id: 'u00',
   name: 'user',
   dbName: 'users',
-  swagger: {
-    public: true
-  },
+  swagger: true,
   fields: {
     _id: { is: 'mongoid' },
     name: { is: 'string' },

@@ -3,15 +3,12 @@ import { join } from 'path';
 import { Tyr } from 'tyranid';
 
 import {
+  pascal,
   path,
   schema,
   spec,
-} from '../';
-
-import {
-  pascal,
   yaml,
-} from '../utils';
+} from '../';
 
 /**
  * boot tyranid without db
@@ -42,7 +39,6 @@ test('should generate correct definition from schema with nesting', async (t) =>
 });
 
 test('should generate correct definition from schema with nesting', async (t) => {
-  const s = spec(Tyr);
-  console.log(yaml(s));
+  console.log(spec(Tyr, { yaml: true }));
   t.pass();
 });

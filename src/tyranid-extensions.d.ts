@@ -46,7 +46,7 @@ declare module 'tyranid' {
        * Can be boolean to add all default routes or object
        * for more granular control.
        */
-      swagger?: SwaggerOptions
+      swagger?: SwaggerOptions;
 
     }
 

@@ -21,6 +21,10 @@ export interface Options {
    * title of public api
    */
   title?: string;
+  /**
+   * return yaml string
+   */
+  yaml?: boolean;
 }
 
 
@@ -31,11 +35,9 @@ export interface Options {
  * @param Tyr initialized tyranid object
  * @param options schema generation options
  */
-export function spec(
-  Tyr: typeof Tyranid,
-  options: Options = {}
-): Spec {
-
+export function spec(Tyr: typeof Tyranid, options?: Options & { yaml: true }): string;
+export function spec(Tyr: typeof Tyranid, options?: Options & { yaml: void | false }): Spec;
+export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string {
   const {
     version = "1.0.0",
     description = "Public API generated from tyranid-swagger",
@@ -59,5 +61,5 @@ export function spec(
     spec.definitions[result.name] = result.schema;
   }
 
-  return spec;
+  return options.yaml ? yaml(spec) : spec;
 }
