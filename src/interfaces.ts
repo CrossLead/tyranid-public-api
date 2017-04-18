@@ -60,3 +60,26 @@ export interface SchemaAnnotation {
    */
   public?: boolean;
 }
+
+
+/**
+ * options for spec generation
+ */
+export interface Options {
+  /**
+   * api version, defaults to 1
+   */
+  version?: string;
+  /**
+   * description of public api
+   */
+  description?: string;
+  /**
+   * title of public api
+   */
+  title?: string;
+  /**
+   * return yaml string
+   */
+  yaml?: boolean;
+}

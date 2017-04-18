@@ -1,31 +1,10 @@
 import { Path, Schema, Spec } from 'swagger-schema-official';
 import { Tyr as Tyranid } from 'tyranid';
-import { SchemaContainer } from './interfaces';
+import { Options, SchemaContainer } from './interfaces';
 import { path } from './path';
 import { schema } from './schema';
 import { yaml } from './utils';
 
-/**
- * options for spec generation
- */
-export interface Options {
-  /**
-   * api version, defaults to 1
-   */
-  version?: string;
-  /**
-   * description of public api
-   */
-  description?: string;
-  /**
-   * title of public api
-   */
-  title?: string;
-  /**
-   * return yaml string
-   */
-  yaml?: boolean;
-}
 
 /**
  * Given an instance of tyranid, create a swagger api spec
