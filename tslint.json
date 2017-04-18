@@ -22,8 +22,9 @@
       false
     ],
     "object-literal-sort-keys": false,
-    "curly": [ true, "ignore-same-line" ],
+    "curly": false,
     "arrow-parens": false,
-    "array-type": false
+    "array-type": [ false ],
+    "no-consecutive-blank-lines": [ false ]
   }
 }

@@ -26,6 +26,8 @@ export function path(
   lookup: { [key: string]: SchemaContainer }
 ): SwaggerPathContainer {
   const opts = def.swagger;
+  const methods = new Set((typeof opts === 'object' && opts.methods) || [ 'all' ]);
+  const includeMethod = (route: string) => methods.has(route) || methods.has('all');
   const base = ((typeof opts === 'object') && opts.route) || (def.name + 's');
   const schemaDef = lookup[def.id];
 
@@ -40,6 +42,10 @@ export function path(
     paths: [] as { route: string, path: Path }[]
   };
 
+  const schemaRef = {
+    $ref: `#/definitions/${schemaDef.name}`
+  };
+
   const idParameter = {
     name: 'id',
     in: 'path',
@@ -49,36 +55,84 @@ export function path(
   };
 
   /**
-   * id routes
+   *
+   * base routes
+   *
    */
-  out.paths.push({
-    route: `/${base}/{id}`,
-    path: {
+  const baseRoutes = {
+    route: `/${base}`,
+    path: {} as Path
+  };
+  out.paths.push(baseRoutes);
 
-      get: {
-        parameters: [
-          idParameter
-        ],
-        responses: {
-          200: {
-            description: `sends the ${schemaDef.name} object`
-          }
-        }
-      },
-
-      delete: {
-        parameters: [
-          idParameter
-        ],
-        responses: {
-          200: {
-            description: `deletes the ${schemaDef.name} object`
+  /**
+   * GET /<collection>/
+   */
+  if (includeMethod('get')) {
+    baseRoutes.path.get = {
+      summary: `retrieve multiple ${schemaDef.name} objects`,
+      responses: {
+        200: {
+          description: `array of ${schemaDef.name} objects`,
+          schema: {
+            type: 'array',
+            items: schemaRef
           }
         }
       }
+    };
+  }
 
-    }
-  });
+  /**
+   *
+   * single id routes
+   *
+   */
+  const singleIdRoutes = {
+    route: `/${base}/{id}`,
+    path: {} as Path
+  };
+  out.paths.push(singleIdRoutes);
+
+  /**
+   * GET /<collection>/{id}
+   */
+  if (includeMethod('get')) {
+    singleIdRoutes.path.get = {
+      summary: 'retrieve an individual ${schemaDef.name} object',
+      parameters: [
+        idParameter
+      ],
+      responses: {
+        200: {
+          description: `sends the ${schemaDef.name} object`,
+          schema: schemaRef
+        }
+      }
+    };
+  }
+
+  /**
+   * DELETE /<collection>/{id}
+   */
+  if (includeMethod('delete')) {
+    singleIdRoutes.path.delete = {
+      summary: 'delete an individual ${schemaDef.name} object',
+      parameters: [
+        idParameter
+      ],
+      responses: {
+        200: {
+          description: `deletes the ${schemaDef.name} object`
+        }
+      }
+    };
+  }
+
+  /**
+   * remove any path entries that don't have any methods
+   */
+  out.paths = out.paths.filter(p => !!Object.keys(p.path).length);
 
   return out;
 }

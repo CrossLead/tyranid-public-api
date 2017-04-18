@@ -37,7 +37,9 @@ export function error(message: string): never {
  * @param obj js object
  */
 export function yaml(obj: object) {
-  return safeDump(obj);
+  return safeDump(obj, {
+    noRefs: true
+  });
 }
 
 /**
