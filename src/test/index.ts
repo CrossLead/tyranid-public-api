@@ -9,7 +9,7 @@ import {
 } from '../';
 
 import {
-  pascalCase,
+  pascal,
   yaml,
 } from '../utils';
 
@@ -26,8 +26,8 @@ test.before(async (t) => {
 });
 
 test('pascalCase should return correct values', (t) => {
-  t.is(pascalCase('my short sentence'), 'MyShortSentence');
-  t.is(pascalCase('my_snake_sentence'), 'MySnakeSentence');
+  t.is(pascal('my short sentence'), 'MyShortSentence');
+  t.is(pascal('my_snake_sentence'), 'MySnakeSentence');
 });
 
 test('should generate correct definition from schema', async (t) => {

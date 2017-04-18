@@ -1,4 +1,5 @@
 import { safeDump } from 'js-yaml';
+import { Tyr } from 'tyranid';
 
 
 /**
@@ -6,7 +7,7 @@ import { safeDump } from 'js-yaml';
  *
  * @param str string to convert to Pascal case
  */
-export function pascalCase(str: string) {
+export function pascal(str: string) {
   const bits = str
     .trim()
     .replace(/[^a-zA-Z0-9]+/gm, '_')

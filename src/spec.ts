@@ -3,7 +3,12 @@ import { Spec, Schema, Path } from 'swagger-schema-official';
 import { yaml } from './utils';
 import { schema } from './schema';
 
-export interface TyranidSwaggerOptions {
+
+
+/**
+ * options for spec generation
+ */
+export interface Options {
   /**
    * api version, defaults to 1
    */
@@ -28,7 +33,7 @@ export interface TyranidSwaggerOptions {
  */
 export function spec(
   Tyr: typeof Tyranid,
-  options: TyranidSwaggerOptions = {}
+  options: Options = {}
 ): Spec {
 
   const {

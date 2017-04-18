@@ -1,15 +1,42 @@
 import { Tyr } from 'tyranid';
-import { pascalCase, error } from './utils';
+import { pascal, error } from './utils';
 import { Schema } from 'swagger-schema-official';
+
 
 
 /**
  * container object for a generated swagger schema
  */
-export interface SwaggerSchemaContainer {
+export interface SchemaContainer {
   name: string;
   schema: Schema;
 }
+
+
+/**
+ * additional properties on tyranid schema
+ * used by tyranid-swagger
+ */
+export interface SchemaAnnotation {
+
+  /**
+   * expose property to public api
+   */
+  public?: boolean;
+
+}
+
+
+
+/**
+ * strings for elements in property path
+ * that do not have names
+ */
+const PATH_MARKERS = {
+  ARRAY: '_',
+  HASH: '[key: string]'
+};
+
 
 
 /**
@@ -21,9 +48,9 @@ export interface SwaggerSchemaContainer {
 export function schema(
   def: Tyr.CollectionDefinitionHydrated,
 ) {
-  const name = pascalCase(def.name);
+  const name = pascal(def.name);
 
-  const out: SwaggerSchemaContainer = {
+  const out: SchemaContainer = {
     name,
     schema: {
       type: 'object',
@@ -36,10 +63,39 @@ export function schema(
 
 
 
+
+/**
+ * mark fields to include in public api
+ */
+function mark() {
+
+
+}
+
+
+
+/**
+ * extend a given path with a new property
+ *
+ * @param path current path
+ * @param next name of next property
+ */
+function extendPath(
+  next: string,
+  path?: string
+) {
+  if (!path) return next;
+  return `${path}.${next}`;
+}
+
+
+
+
 /**
  * Convert hash of tyranid fields to hash of swagger schema
  *
  * @param fields hash of tyranid field instances
+ * @param path property path in schema of current field hash
  */
 function swaggerObject(
   fields: { [key: string]: Tyr.FieldInstance },
@@ -49,7 +105,7 @@ function swaggerObject(
   for (const field in fields) {
     properties[field] = swaggerType(
       fields[field],
-      field + (path ? `.${path}` : '')
+      extendPath(field, path)
     );
   }
 
@@ -59,17 +115,15 @@ function swaggerObject(
 
 
 /**
- * Translate a set of tyranid field to a swagger definition
+ * Translate a tyranid field to a swagger definition
  *
- * @param path property path in schema of current field hash
  * @param field tyranid schema field
+ * @param path property path in schema of current field
  */
 function swaggerType(
   field: Tyr.FieldInstance,
   path: string
 ) {
-  if (!field) return error(`no \`def\` property on field: ${path}`);
-
   /**
    * TODO: should links be refs?
    */
@@ -117,7 +171,10 @@ function swaggerType(
 
       schemaObj = {
         type: 'array',
-        items: swaggerType(subfields, `${path}._`)
+        items: swaggerType(
+          subfields,
+          extendPath(PATH_MARKERS.ARRAY, path)
+        )
       }
       break;
     }
@@ -149,7 +206,10 @@ function swaggerType(
         // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
         // pull in new typings and remove any cast.
         /* tslint:disable */
-        (<any> schemaObj).additionalProperties = swaggerType(values, `${path}.[key: string]`);
+        (<any> schemaObj).additionalProperties = swaggerType(
+          values,
+          extendPath(PATH_MARKERS.HASH, path)
+        );
         /* tslint:enable */
 
         break;
@@ -195,3 +255,4 @@ function swaggerType(
 
   return schemaObj;
 }
+
