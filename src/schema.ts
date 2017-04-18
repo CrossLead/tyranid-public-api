@@ -1,27 +1,7 @@
 import { Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { SchemaOptions } from './spec';
+import { SchemaContainer, SchemaOptions } from './interfaces';
 import { each, error, pascal } from './utils';
-
-/**
- * container object for a generated swagger schema
- */
-export interface SchemaContainer {
-  name: string;
-  id: string;
-  schema: Schema;
-}
-
-/**
- * additional properties on tyranid schema
- * used by tyranid-swagger
- */
-export interface SchemaAnnotation {
-  /**
-   * expose property to public api
-   */
-  public?: boolean;
-}
 
 /**
  * strings for elements in property path

@@ -1,19 +1,9 @@
 import { Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { SchemaContainer } from './schema';
-import { SchemaOptions } from './spec';
+import { PathContainer, SchemaContainer } from './interfaces';
 import { each, error, pascal } from './utils';
 
-/**
- * container object for a generated swagger path
- */
-export interface SwaggerPathContainer {
-  id: string;
-  paths: {
-    route: string,
-    path: Path;
-  }[];
-}
+
 
 /**
  * Given a tyranid schema, produce an object path
@@ -24,7 +14,7 @@ export interface SwaggerPathContainer {
 export function path(
   def: Tyr.CollectionDefinitionHydrated,
   lookup: { [key: string]: SchemaContainer }
-): SwaggerPathContainer {
+): PathContainer {
   const opts = def.swagger;
   const methods = new Set((typeof opts === 'object' && opts.methods) || [ 'all' ]);
   const includeMethod = (route: string) => methods.has(route) || methods.has('all');

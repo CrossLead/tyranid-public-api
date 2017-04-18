@@ -1,34 +1,9 @@
 import { Path, Schema, Spec } from 'swagger-schema-official';
 import { Tyr as Tyranid } from 'tyranid';
+import { SchemaContainer } from './interfaces';
 import { path } from './path';
-import { schema, SchemaContainer } from './schema';
+import { schema } from './schema';
 import { yaml } from './utils';
-
-/**
- * Swagger options listed in tyranid schema annotations
- */
-export type SchemaOptions = boolean | {
-
-  /**
-   * methods to generate for this field
-   */
-  methods?: Array<'get' | 'post' | 'put' | 'delete'>;
-
-  /**
-   * description to use instead of the main field note
-   */
-  note?: string;
-
-  /**
-   * scopes required for this field
-   */
-  scopes?: string[];
-
-  /**
-   * custom route name for collection
-   */
-  route?: string;
-};
 
 /**
  * options for spec generation

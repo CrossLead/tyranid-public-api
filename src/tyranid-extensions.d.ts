@@ -1,5 +1,5 @@
 import { Tyr } from 'tyranid';
-import { SchemaOptions } from './spec';
+import { SchemaOptions } from './interfaces';
 
 /**
  * module augmentations for tyranid
