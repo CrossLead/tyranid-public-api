@@ -1,5 +1,5 @@
-import { Tyr } from 'tyranid';
 import { Path } from 'swagger-schema-official';
+import { Tyr } from 'tyranid';
 
 /**
  * container object for a generated swagger path
@@ -8,7 +8,6 @@ export interface SwaggerPathContainer {
   name: string;
   path: Path;
 }
-
 
 /**
  * Given a tyranid schema, produce an object path
@@ -23,7 +22,6 @@ export function path(
     name: '',
     path: {}
   };
-
 
   return out;
 }

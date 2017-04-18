@@ -9,7 +9,8 @@
     "ava": "ava",
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "tslint --fix ./src/**/*.ts"
+    "lint:fix": "tslint --fix -c tslint.json './src/**/*.ts'",
+    "lint": "tslint -c tslint.json './src/**/*.ts'"
   },
   "keywords": [
     "tyranid",

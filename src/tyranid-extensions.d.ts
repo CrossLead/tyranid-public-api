@@ -1,12 +1,11 @@
 import { Tyr } from 'tyranid';
 
-
 type SwaggerOptions = boolean | {
 
   /**
    * methods to generate for this field
    */
-  methods?: ('get' | 'post' | 'put' | 'delete')[];
+  methods?: Array<'get' | 'post' | 'put' | 'delete'>;
 
   /**
    * description to use instead of the main field note
@@ -19,7 +18,6 @@ type SwaggerOptions = boolean | {
   scopes?: string[];
 
 };
-
 
 /**
  * module augmentations for tyranid

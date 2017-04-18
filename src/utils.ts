@@ -1,7 +1,6 @@
 import { safeDump } from 'js-yaml';
 import { Tyr } from 'tyranid';
 
-
 /**
  * Convert a string to PascalCase
  *
@@ -17,13 +16,11 @@ export function pascal(str: string) {
   for (const bit of bits) {
     out += bit.length < 2
       ? (bit || '').toLocaleUpperCase()
-      : bit.charAt(0).toLocaleUpperCase() + bit.slice(1)
+      : bit.charAt(0).toLocaleUpperCase() + bit.slice(1);
   }
 
   return out;
 }
-
-
 
 /**
  * Throw error with library prefix
@@ -34,8 +31,6 @@ export function error(message: string): never {
   throw new Error(`tyranid-swagger: ${message.replace(/\s+/g, ' ')}`);
 }
 
-
-
 /**
  * Convert object to yaml
  *
@@ -43,4 +38,17 @@ export function error(message: string): never {
  */
 export function yaml(obj: object) {
   return safeDump(obj);
+}
+
+export type ObjectIteree<T> = (element: T, field: string) => boolean | void;
+
+export function each<T>(
+  obj: { [key: string]: T },
+  fn: ObjectIteree<T>
+) {
+  for (const field in obj) {
+    if (obj.hasOwnProperty(field)) {
+      fn(obj[field], field);
+    }
+  }
 }

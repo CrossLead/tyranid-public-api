@@ -1,8 +1,6 @@
-import { Tyr } from 'tyranid';
-import { pascal, error } from './utils';
 import { Schema } from 'swagger-schema-official';
-
-
+import { Tyr } from 'tyranid';
+import { each, error, pascal } from './utils';
 
 /**
  * container object for a generated swagger schema
@@ -12,21 +10,16 @@ export interface SchemaContainer {
   schema: Schema;
 }
 
-
 /**
  * additional properties on tyranid schema
  * used by tyranid-swagger
  */
 export interface SchemaAnnotation {
-
   /**
    * expose property to public api
    */
   public?: boolean;
-
 }
-
-
 
 /**
  * strings for elements in property path
@@ -36,8 +29,6 @@ const PATH_MARKERS = {
   ARRAY: '_',
   HASH: '[key: string]'
 };
-
-
 
 /**
  * Given a tyranid schema, produce an object schema
@@ -61,18 +52,30 @@ export function schema(
   return out;
 }
 
+// /**
+//  * mark fields to include in public api
+//  */
+// function included(def: Tyr.CollectionDefinitionHydrated) {
 
+//   /**
+//    * collection level options for spec generation
+//    */
+//   const colOpts = def.swagger;
+//   let includconstSpec = !!colOpts;
 
+//   const stack = [] as Tyr.FieldInstance[];
 
-/**
- * mark fields to include in public api
- */
-function mark() {
+//   for (const fieldName in def.fields) {
+//     const field = def.fields[fieldName];
+//     stack.push(field);
 
+//     let current: Tyr.FieldInstance | undefined;
+//     while (current = stack.pop()) {
 
-}
+//     }
+//   }
 
-
+// }
 
 /**
  * extend a given path with a new property
@@ -85,11 +88,9 @@ function extendPath(
   path?: string
 ) {
   if (!path) return next;
+
   return `${path}.${next}`;
 }
-
-
-
 
 /**
  * Convert hash of tyranid fields to hash of swagger schema
@@ -102,17 +103,15 @@ function swaggerObject(
   path?: string
 ) {
   const properties: { [key: string]: Schema } = {};
-  for (const field in fields) {
-    properties[field] = swaggerType(
-      fields[field],
-      extendPath(field, path)
+
+  each(fields, (field, name) => {
+    properties[name] = swaggerType(
+      field, extendPath(name, path)
     );
-  }
+  });
 
   return properties;
 }
-
-
 
 /**
  * Translate a tyranid field to a swagger definition
@@ -124,14 +123,12 @@ function swaggerType(
   field: Tyr.FieldInstance,
   path: string
 ) {
-  /**
-   * TODO: should links be refs?
-   */
+  // TODO: should links be refs?
   const type = field.def.link
     ? 'string'
     : field.def.is;
 
-  let schemaObj: Schema;
+  const schemaObj: Schema = {};
 
   switch (type) {
 
@@ -144,7 +141,7 @@ function swaggerType(
     case 'double':
     case 'string':
     case 'date': {
-      schemaObj = { type };
+      Object.assign(schemaObj, { type });
       break;
     }
 
@@ -153,7 +150,7 @@ function swaggerType(
      */
     case 'mongoid':
     case 'email': {
-      schemaObj = { type: 'string' };
+      Object.assign(schemaObj, { type: 'string' });
       break;
     }
 
@@ -161,21 +158,18 @@ function swaggerType(
      * array types
      */
     case 'array': {
-      const subfields = field.of;
-      if (!subfields) {
+      const element = field.of;
+      if (!element) {
         return error(`
           field "${path}" is of type \`array\`
           but missing an \`of\` property
         `);
       }
 
-      schemaObj = {
+      Object.assign(schemaObj, {
         type: 'array',
-        items: swaggerType(
-          subfields,
-          extendPath(PATH_MARKERS.ARRAY, path)
-        )
-      }
+        items: swaggerType(element, extendPath(PATH_MARKERS.ARRAY, path))
+      });
       break;
     }
 
@@ -187,10 +181,9 @@ function swaggerType(
       const values = field.of;
       const subfields = field.fields;
 
-      schemaObj = {
+      Object.assign(schemaObj, {
         type: 'object'
-      }
-
+      });
 
       /**
        * if the sub object is a hash
@@ -230,7 +223,6 @@ function swaggerType(
       break;
     }
 
-
     default: return error(`field "${path}" is of unsupported type: ${type}`);
   }
 
@@ -255,4 +247,3 @@ function swaggerType(
 
   return schemaObj;
 }
-

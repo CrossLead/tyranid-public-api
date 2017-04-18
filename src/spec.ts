@@ -1,9 +1,7 @@
+import { Path, Schema, Spec } from 'swagger-schema-official';
 import { Tyr as Tyranid } from 'tyranid';
-import { Spec, Schema, Path } from 'swagger-schema-official';
-import { yaml } from './utils';
 import { schema } from './schema';
-
-
+import { yaml } from './utils';
 
 /**
  * options for spec generation
@@ -26,8 +24,6 @@ export interface Options {
    */
   yaml?: boolean;
 }
-
-
 
 /**
  * Given an instance of tyranid, create a swagger api spec
@@ -57,6 +53,7 @@ export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string 
 
   for (const col of Tyr.collections) {
     if (!col.def.swagger) continue;
+
     const result = schema(col.def);
     spec.definitions[result.name] = result.schema;
   }
