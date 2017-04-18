@@ -2,15 +2,17 @@ import { Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { SchemaContainer } from './schema';
 import { SchemaOptions } from './spec';
-import { each, pascal } from './utils';
+import { each, error, pascal } from './utils';
 
 /**
  * container object for a generated swagger path
  */
 export interface SwaggerPathContainer {
   id: string;
-  route: string;
-  path: Path;
+  paths: {
+    route: string,
+    path: Path;
+  }[];
 }
 
 /**
@@ -24,18 +26,59 @@ export function path(
   lookup: { [key: string]: SchemaContainer }
 ): SwaggerPathContainer {
   const opts = def.swagger;
+  const base = ((typeof opts === 'object') && opts.route) || (def.name + 's');
+  const schemaDef = lookup[def.id];
+
+  if (!schemaDef) {
+    return error(`
+      No schema definition found for collection id = ${def.id}
+    `);
+  }
 
   const out = {
-    route: ((typeof opts === 'object') && opts.route) || def.name,
     id: def.id,
-    path: {
-
-    } as Path
+    paths: [] as { route: string, path: Path }[]
   };
 
-  // each(def.fields, (field) => {
+  const idParameter = {
+    name: 'id',
+    in: 'path',
+    type: 'string',
+    description: `id of the ${schemaDef.name} object`,
+    required: true
+  };
 
-  // });
+  /**
+   * id routes
+   */
+  out.paths.push({
+    route: `/${base}/{id}`,
+    path: {
+
+      get: {
+        parameters: [
+          idParameter
+        ],
+        responses: {
+          200: {
+            description: `sends the ${schemaDef.name} object`
+          }
+        }
+      },
+
+      delete: {
+        parameters: [
+          idParameter
+        ],
+        responses: {
+          200: {
+            description: `deletes the ${schemaDef.name} object`
+          }
+        }
+      }
+
+    }
+  });
 
   return out;
 }

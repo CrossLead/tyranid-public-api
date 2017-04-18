@@ -95,7 +95,10 @@ export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string 
    */
   collections.forEach(col => {
     const result = path(col.def, lookup);
-    spec.paths[result.route] = result.path;
+    const paths = result.paths;
+    for (const p of paths) {
+      spec.paths[p.route] = p.path;
+    }
   });
 
   return options.yaml ? yaml(spec) : spec;
