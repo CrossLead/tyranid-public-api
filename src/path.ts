@@ -1,11 +1,15 @@
 import { Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
+import { SchemaContainer } from './schema';
+import { SchemaOptions } from './spec';
+import { each, pascal } from './utils';
 
 /**
  * container object for a generated swagger path
  */
 export interface SwaggerPathContainer {
-  name: string;
+  id: string;
+  route: string;
   path: Path;
 }
 
@@ -17,11 +21,21 @@ export interface SwaggerPathContainer {
  */
 export function path(
   def: Tyr.CollectionDefinitionHydrated,
+  lookup: { [key: string]: SchemaContainer }
 ): SwaggerPathContainer {
+  const opts = def.swagger;
+
   const out = {
-    name: '',
-    path: {}
+    route: ((typeof opts === 'object') && opts.route) || def.name,
+    id: def.id,
+    path: {
+
+    } as Path
   };
+
+  // each(def.fields, (field) => {
+
+  // });
 
   return out;
 }

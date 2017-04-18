@@ -1,23 +1,5 @@
 import { Tyr } from 'tyranid';
-
-type SwaggerOptions = boolean | {
-
-  /**
-   * methods to generate for this field
-   */
-  methods?: Array<'get' | 'post' | 'put' | 'delete'>;
-
-  /**
-   * description to use instead of the main field note
-   */
-  note?: string;
-
-  /**
-   * scopes required for this field
-   */
-  scopes?: string[];
-
-};
+import { SchemaOptions } from './spec';
 
 /**
  * module augmentations for tyranid
@@ -33,7 +15,7 @@ declare module 'tyranid' {
        * can be boolean to add all default routes or object
        * for more granular control.
        */
-      swagger?: SwaggerOptions;
+      swagger?: SchemaOptions;
 
     }
 
@@ -44,7 +26,7 @@ declare module 'tyranid' {
        * Can be boolean to add all default routes or object
        * for more granular control.
        */
-      swagger?: SwaggerOptions;
+      swagger?: SchemaOptions;
 
     }
 

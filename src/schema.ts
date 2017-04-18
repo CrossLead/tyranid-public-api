@@ -1,5 +1,6 @@
 import { Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
+import { SchemaOptions } from './spec';
 import { each, error, pascal } from './utils';
 
 /**
@@ -7,6 +8,7 @@ import { each, error, pascal } from './utils';
  */
 export interface SchemaContainer {
   name: string;
+  id: string;
   schema: Schema;
 }
 
@@ -43,6 +45,7 @@ export function schema(
 
   const out: SchemaContainer = {
     name,
+    id: def.id,
     schema: {
       type: 'object',
       properties: swaggerObject(def.fields)
@@ -51,31 +54,6 @@ export function schema(
 
   return out;
 }
-
-// /**
-//  * mark fields to include in public api
-//  */
-// function included(def: Tyr.CollectionDefinitionHydrated) {
-
-//   /**
-//    * collection level options for spec generation
-//    */
-//   const colOpts = def.swagger;
-//   let includconstSpec = !!colOpts;
-
-//   const stack = [] as Tyr.FieldInstance[];
-
-//   for (const fieldName in def.fields) {
-//     const field = def.fields[fieldName];
-//     stack.push(field);
-
-//     let current: Tyr.FieldInstance | undefined;
-//     while (current = stack.pop()) {
-
-//     }
-//   }
-
-// }
 
 /**
  * extend a given path with a new property
@@ -127,6 +105,9 @@ function swaggerType(
   const type = field.def.link
     ? 'string'
     : field.def.is;
+
+  const swagger = field.def.swagger;
+  const opts: SchemaOptions = ((typeof swagger === 'object' && swagger) || {});
 
   const schemaObj: Schema = {};
 
@@ -241,8 +222,10 @@ function swaggerType(
   /**
    * add note from schema
    */
-  if (field.def.note) {
-    schemaObj.description = field.def.note;
+  if (opts.note || field.def.note) {
+    schemaObj.description = (
+      opts.note || field.def.note || ''
+    ).replace(/\t+/mg, '');
   }
 
   return schemaObj;

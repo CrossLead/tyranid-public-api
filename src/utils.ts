@@ -40,15 +40,19 @@ export function yaml(obj: object) {
   return safeDump(obj);
 }
 
-export type ObjectIteree<T> = (element: T, field: string) => boolean | void;
-
+/**
+ * Iterate over properties in object
+ *
+ * @param obj javascript object
+ * @param fn iteree function
+ */
 export function each<T>(
   obj: { [key: string]: T },
-  fn: ObjectIteree<T>
+  fn: (element: T, field: string) => boolean | void
 ) {
   for (const field in obj) {
     if (obj.hasOwnProperty(field)) {
-      fn(obj[field], field);
+      if (fn(obj[field], field)) break;
     }
   }
 }

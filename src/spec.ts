@@ -1,7 +1,34 @@
 import { Path, Schema, Spec } from 'swagger-schema-official';
 import { Tyr as Tyranid } from 'tyranid';
-import { schema } from './schema';
+import { path } from './path';
+import { schema, SchemaContainer } from './schema';
 import { yaml } from './utils';
+
+/**
+ * Swagger options listed in tyranid schema annotations
+ */
+export type SchemaOptions = boolean | {
+
+  /**
+   * methods to generate for this field
+   */
+  methods?: Array<'get' | 'post' | 'put' | 'delete'>;
+
+  /**
+   * description to use instead of the main field note
+   */
+  note?: string;
+
+  /**
+   * scopes required for this field
+   */
+  scopes?: string[];
+
+  /**
+   * custom route name for collection
+   */
+  route?: string;
+};
 
 /**
  * options for spec generation
@@ -51,12 +78,25 @@ export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string 
     definitions: {} as { [key: string]: Schema }
   };
 
-  for (const col of Tyr.collections) {
-    if (!col.def.swagger) continue;
+  const lookup = {} as {[key: string]: SchemaContainer };
+  const collections = Tyr.collections.filter(c => !!c.def.swagger);
 
+  /**
+   * create swagger object schemas for relevant collections / properties
+   */
+  collections.forEach(col => {
     const result = schema(col.def);
+    lookup[result.id] = result;
     spec.definitions[result.name] = result.schema;
-  }
+  });
+
+  /**
+   * create routes referencing relevant schema
+   */
+  collections.forEach(col => {
+    const result = path(col.def, lookup);
+    spec.paths[result.route] = result.path;
+  });
 
   return options.yaml ? yaml(spec) : spec;
 }
