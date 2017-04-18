@@ -54,7 +54,7 @@ export function spec(
   };
 
   for (const col of Tyr.collections) {
-    if (!((<any> col.def).swagger && ((<any> col.def).swagger.public))) continue;
+    if (!col.def.swagger) continue;
     const result = schema(col.def);
     spec.definitions[result.name] = result.schema;
   }
