@@ -199,7 +199,7 @@ function swaggerType(
         );
       }
 
-      schemaObj.items = swaggerObject(subfields, path);
+      schemaObj.properties = swaggerObject(subfields, path);
 
       break;
     }

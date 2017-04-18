@@ -8,7 +8,6 @@ export default new Tyr.Collection({
   fields: {
     _id: { is: 'mongoid' },
     name: { is: 'string' },
-    count: { is: 'double' },
     linkId: { link: 'linked' },
     nestedMapArray: {
       is: 'array',
