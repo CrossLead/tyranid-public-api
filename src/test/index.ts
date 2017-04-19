@@ -7,7 +7,8 @@ import {
   path,
   schema,
   spec,
-  yaml,
+  validate,
+  yaml
 } from '../';
 
 /**
@@ -39,6 +40,6 @@ test('should generate correct definition from schema with nesting', async (t) =>
 });
 
 test('should generate correct definition from schema with nesting', async (t) => {
-  console.log(spec(Tyr, { yaml: true }));
-  t.pass();
+  const result = validate(spec(Tyr));
+  t.true(result);
 });

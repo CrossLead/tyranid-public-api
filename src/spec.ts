@@ -12,8 +12,8 @@ import { options, yaml } from './utils';
  * @param Tyr initialized tyranid object
  * @param options schema generation options
  */
-export function spec(Tyr: typeof Tyranid, opts?: Options & { yaml: true }): string;
-export function spec(Tyr: typeof Tyranid, opts?: Options & { yaml: void | false }): Spec;
+export function spec(Tyr: typeof Tyranid, opts: Options & { yaml: true }): string;
+export function spec(Tyr: typeof Tyranid, opts?: Options & { yaml?: void | false }): Spec;
 export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   const {
     version = "1.0.0",

@@ -5,6 +5,10 @@ import { each, error, options, pascal } from './utils';
 
 
 
+
+
+
+
 /**
  * Given a tyranid schema, produce an object path
  * to insert into the Open API spec.

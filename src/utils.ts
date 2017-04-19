@@ -1,4 +1,6 @@
+import * as AJV from 'ajv';
 import { safeDump } from 'js-yaml';
+import { Spec } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { SchemaOptions } from './interfaces';
 
@@ -69,4 +71,21 @@ export function each<T>(
 export function options(def: { openAPI?: SchemaOptions }) {
   const openAPI = def.openAPI;
   return (typeof openAPI === 'object' && openAPI) || {};
+}
+
+
+/**
+ * Validate a spec against the openAPI spec schema
+ *
+ * @param spec open api spec object
+ */
+export function validate(spec: Spec) {
+  const ajv = new AJV({ validateSchema: true });
+
+  /* tslint:disable */
+  ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
+  const openAPIJSONSchema = require('swagger-schema-official/schema.json');
+  /* tslint:enable */
+
+  return ajv.validate(openAPIJSONSchema, spec);
 }
