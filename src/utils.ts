@@ -83,5 +83,10 @@ export function validate(spec: Spec) {
   const openAPIJSONSchema = require('swagger-schema-official/schema.json');
   /* tslint:enable */
 
-  return ajv.validate(openAPIJSONSchema, spec);
+  const result = ajv.validate(openAPIJSONSchema, spec);
+
+  return {
+    valid: result,
+    errors:  (ajv.errors || []).slice()
+  };
 }

@@ -22,6 +22,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@types/swagger-schema-official": "2.0.2",
+    "@types/ajv": "1.0.0",
     "ajv": "5.0.0",
     "js-yaml": "3.8.3",
     "swagger-schema-official": "2.0.0-bab6bed"
@@ -30,7 +31,6 @@
     "tyranid": "^0.1.45"
   },
   "devDependencies": {
-    "@types/ajv": "1.0.0",
     "@types/js-yaml": "3.5.29",
     "@types/lodash": "4.14.62",
     "@types/node": "6.0.68",

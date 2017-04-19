@@ -1,4 +1,11 @@
-import { Path, Schema, Spec } from 'swagger-schema-official';
+import {
+  OAuth2ApplicationSecurity,
+  Path,
+  Schema,
+  Security,
+  Spec
+} from 'swagger-schema-official';
+
 import { Tyr as Tyranid } from 'tyranid';
 import { Options, SchemaContainer } from './interfaces';
 import { path } from './path';
@@ -20,12 +27,25 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     title = "Public API"
   } = opts;
 
+  const oauth2Scopes = {};
+
   const spec = {
     swagger: "2.0",
     info: {
       description,
       title,
       version
+    },
+    schemes: [
+      'https'
+    ],
+    securityDefinitions: {
+      oauth2: {
+        type: "oauth2",
+        authorizationUrl: "http://api.example.com/api/auth/",
+        flow: "implicit",
+        scopes: oauth2Scopes
+      }
     },
     paths: {} as { [key: string]: Path },
     definitions: {} as { [key: string]: Schema }
@@ -41,6 +61,9 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     const result = schema(col.def);
     lookup[result.id] = result;
     spec.definitions[result.name] = result.schema;
+
+    // add scopes for this collection
+    Object.assign(oauth2Scopes, scopes(result.name));
   });
 
   /**
@@ -55,4 +78,16 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   });
 
   return opts.yaml ? yaml(spec) : spec;
+}
+
+/**
+ * Create oauth2 schemas for a given object type
+ *
+ * @param name name of api object
+ */
+function scopes(name: string) {
+  return {
+    [`read:${name}`]: `Read access to ${name} objects`,
+    [`write:${name}`]: `Write access to ${name} objects`
+  };
 }
