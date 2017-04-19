@@ -28,7 +28,7 @@ export function schema(
     id: def.id,
     schema: {
       type: 'object',
-      properties: oaiObject(def.fields)
+      properties: schemaObject(def.fields)
     }
   };
 
@@ -56,14 +56,14 @@ function extendPath(
  * @param fields hash of tyranid field instances
  * @param path property path in schema of current field hash
  */
-function oaiObject(
+function schemaObject(
   fields: { [key: string]: Tyr.FieldInstance },
   path?: string
 ) {
   const properties: { [key: string]: Schema } = {};
 
   each(fields, (field, name) => {
-    properties[name] = oaiType(
+    properties[name] = schemaType(
       field, extendPath(name, path)
     );
   });
@@ -77,7 +77,7 @@ function oaiObject(
  * @param field tyranid schema field
  * @param path property path in schema of current field
  */
-function oaiType(
+function schemaType(
   field: Tyr.FieldInstance,
   path: string
 ) {
@@ -87,8 +87,7 @@ function oaiType(
     : field.def.is;
 
   const opts = options(field.def);
-
-  const schemaObj: Schema = {};
+  const out: Schema = {};
 
   switch (type) {
 
@@ -101,7 +100,7 @@ function oaiType(
     case 'double':
     case 'string':
     case 'date': {
-      Object.assign(schemaObj, { type });
+      Object.assign(out, { type });
       break;
     }
 
@@ -110,7 +109,7 @@ function oaiType(
      */
     case 'mongoid':
     case 'email': {
-      Object.assign(schemaObj, { type: 'string' });
+      Object.assign(out, { type: 'string' });
       break;
     }
 
@@ -126,9 +125,9 @@ function oaiType(
         `);
       }
 
-      Object.assign(schemaObj, {
+      Object.assign(out, {
         type: 'array',
-        items: oaiType(element, extendPath(PATH_MARKERS.ARRAY, path))
+        items: schemaType(element, extendPath(PATH_MARKERS.ARRAY, path))
       });
       break;
     }
@@ -141,7 +140,7 @@ function oaiType(
       const values = field.of;
       const subfields = field.fields;
 
-      Object.assign(schemaObj, {
+      Object.assign(out, {
         type: 'object'
       });
 
@@ -159,7 +158,7 @@ function oaiType(
         // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
         // pull in new typings and remove any cast.
         /* tslint:disable */
-        (<any> schemaObj).additionalProperties = oaiType(
+        (<any> out).additionalProperties = schemaType(
           values,
           extendPath(PATH_MARKERS.HASH, path)
         );
@@ -178,7 +177,7 @@ function oaiType(
         );
       }
 
-      schemaObj.properties = oaiObject(subfields, path);
+      out.properties = schemaObject(subfields, path);
 
       break;
     }
@@ -189,10 +188,10 @@ function oaiType(
   /**
    * add formats
    */
-  switch (schemaObj.type) {
+  switch (out.type) {
 
     case 'integer': {
-      schemaObj.format = 'i32';
+      out.format = 'i32';
       break;
     }
 
@@ -202,10 +201,10 @@ function oaiType(
    * add note from schema
    */
   if (opts.note || field.def.note) {
-    schemaObj.description = (
+    out.description = (
       opts.note || field.def.note || ''
     ).replace(/\t+/mg, '');
   }
 
-  return schemaObj;
+  return out;
 }
