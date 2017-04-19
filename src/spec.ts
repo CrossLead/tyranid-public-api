@@ -12,6 +12,11 @@ import { path } from './path';
 import { schema } from './schema';
 import { options, yaml } from './utils';
 
+import {
+  collectionScopes,
+  createSecurityDefinitions
+} from './security';
+
 /**
  * Given an instance of tyranid, create a Open API api spec
  *
@@ -39,14 +44,6 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     schemes: [
       'https'
     ],
-    securityDefinitions: {
-      oauth2: {
-        type: "oauth2",
-        authorizationUrl: "http://api.example.com/api/auth/",
-        flow: "implicit",
-        scopes: oauth2Scopes
-      }
-    },
     paths: {} as { [key: string]: Path },
     definitions: {} as { [key: string]: Schema }
   };
@@ -63,7 +60,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     spec.definitions[result.name] = result.schema;
 
     // add scopes for this collection
-    Object.assign(oauth2Scopes, scopes(result.name));
+    Object.assign(oauth2Scopes, collectionScopes(result.name));
   });
 
   /**
@@ -77,17 +74,9 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     }
   });
 
-  return opts.yaml ? yaml(spec) : spec;
-}
+  Object.assign(spec, {
+    securityDefinitions: createSecurityDefinitions(oauth2Scopes)
+  });
 
-/**
- * Create oauth2 schemas for a given object type
- *
- * @param name name of api object
- */
-function scopes(name: string) {
-  return {
-    [`read:${name}`]: `Read access to ${name} objects`,
-    [`write:${name}`]: `Write access to ${name} objects`
-  };
+  return opts.yaml ? yaml(spec) : spec;
 }

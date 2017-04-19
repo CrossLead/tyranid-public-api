@@ -1,6 +1,7 @@
 import { Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { PathContainer, SchemaContainer } from './interfaces';
+import { requireScopes } from './security';
 import { each, error, options, pascal } from './utils';
 
 /**
@@ -66,7 +67,9 @@ export function path(
   if (includeMethod('get')) {
     baseRoutes.path.get = {
       ...common,
+      ...requireScopes(schemaDef.name, 'read'),
       summary: `retrieve multiple ${schemaDef.name} objects`,
+      // TODO: fix typings
       responses: {
         ...denied(),
         ...invalid(),
@@ -94,8 +97,9 @@ export function path(
    */
   if (includeMethod('get')) {
     singleIdRoutes.path.get = {
-      ...common,
       summary: 'retrieve an individual ${schemaDef.name} object',
+      ...common,
+      ...requireScopes(schemaDef.name, 'read'),
       parameters: [
         idParameter
       ],
@@ -112,6 +116,7 @@ export function path(
    */
   if (includeMethod('delete')) {
     singleIdRoutes.path.delete = {
+      ...requireScopes(schemaDef.name, 'write'),
       summary: 'delete an individual ${schemaDef.name} object',
       parameters: [
         idParameter
