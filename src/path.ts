@@ -26,6 +26,8 @@ export function path(
     `);
   }
 
+  const { name } = schemaDef;
+
   const out = {
     id: def.id,
     paths: [] as { route: string, path: Path }[]
@@ -39,14 +41,14 @@ export function path(
   };
 
   const schemaRef = {
-    $ref: `#/definitions/${schemaDef.name}`
+    $ref: `#/definitions/${name}`
   };
 
   const idParameter = {
     name: 'id',
     in: 'path',
     type: 'string',
-    description: `id of the ${schemaDef.name} object`,
+    description: `id of the ${name} object`,
     required: true
   };
 
@@ -67,13 +69,13 @@ export function path(
   if (includeMethod('get')) {
     baseRoutes.path.get = {
       ...common,
-      ...requireScopes(schemaDef.name, 'read'),
-      summary: `retrieve multiple ${schemaDef.name} objects`,
+      ...requireScopes(name, 'read'),
+      summary: `retrieve multiple ${name} objects`,
       // TODO: fix typings
       responses: {
         ...denied(),
         ...invalid(),
-        ...success(`array of ${schemaDef.name} objects`, {
+        ...success(`array of ${name} objects`, {
           type: 'array',
           items: schemaRef
         })
@@ -97,16 +99,16 @@ export function path(
    */
   if (includeMethod('get')) {
     singleIdRoutes.path.get = {
-      summary: 'retrieve an individual ${schemaDef.name} object',
+      summary: `retrieve an individual ${name} object`,
       ...common,
-      ...requireScopes(schemaDef.name, 'read'),
+      ...requireScopes(name, 'read'),
       parameters: [
         idParameter
       ],
       responses: {
         ...denied(),
         ...invalid(),
-        ...success(`sends the ${schemaDef.name} object`, schemaRef)
+        ...success(`sends the ${name} object`, schemaRef)
       }
     };
   }
@@ -116,15 +118,15 @@ export function path(
    */
   if (includeMethod('delete')) {
     singleIdRoutes.path.delete = {
-      ...requireScopes(schemaDef.name, 'write'),
-      summary: 'delete an individual ${schemaDef.name} object',
+      ...requireScopes(name, 'write'),
+      summary: `delete an individual ${name} object`,
       parameters: [
         idParameter
       ],
       responses: {
         ...denied(),
         ...invalid(),
-        ...success(`deletes the ${schemaDef.name} object`)
+        ...success(`deletes the ${name} object`)
       }
     };
   }
