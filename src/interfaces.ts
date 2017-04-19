@@ -2,7 +2,7 @@ import { Path, Schema } from 'swagger-schema-official';
 
 
 /**
- * Swagger options listed in tyranid schema annotations
+ * Open API options listed in tyranid schema annotations
  */
 export type SchemaOptions = boolean | {
 
@@ -29,7 +29,7 @@ export type SchemaOptions = boolean | {
 
 
 /**
- * container object for a generated swagger path
+ * container object for a generated Open API path
  */
 export interface PathContainer {
   id: string;
@@ -41,7 +41,7 @@ export interface PathContainer {
 
 
 /**
- * container object for a generated swagger schema
+ * container object for a generated Open API schema
  */
 export interface SchemaContainer {
   name: string;
@@ -52,7 +52,7 @@ export interface SchemaContainer {
 
 /**
  * additional properties on tyranid schema
- * used by tyranid-swagger
+ * used by tyranid-Open API
  */
 export interface SchemaAnnotation {
   /**

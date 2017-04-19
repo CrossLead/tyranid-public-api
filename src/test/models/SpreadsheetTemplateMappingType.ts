@@ -7,7 +7,7 @@ export const SpreadsheetTemplateMappingType = new Tyr.Collection({
   id: 'stt',
   name: 'spreadsheetTemplateMappingType',
   enum: true,
-  swagger: {
+  openAPI: {
     route: 'type'
   },
   fields: { _id: { is: 'integer' }, name: { is: 'string', labelField: true } },

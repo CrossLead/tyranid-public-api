@@ -1,13 +1,13 @@
 import { Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { PathContainer, SchemaContainer } from './interfaces';
-import { each, error, pascal } from './utils';
+import { each, error, options, pascal } from './utils';
 
 
 
 /**
  * Given a tyranid schema, produce an object path
- * to insert into the swagger spec.
+ * to insert into the Open API spec.
  *
  * @param def a tyranid collection schema definition object
  */
@@ -15,10 +15,10 @@ export function path(
   def: Tyr.CollectionDefinitionHydrated,
   lookup: { [key: string]: SchemaContainer }
 ): PathContainer {
-  const opts = def.swagger;
-  const methods = new Set((typeof opts === 'object' && opts.methods) || [ 'all' ]);
+  const opts = options(def);
+  const methods = new Set(opts.methods || [ 'all' ]);
   const includeMethod = (route: string) => methods.has(route) || methods.has('all');
-  const base = ((typeof opts === 'object') && opts.route) || (def.name + 's');
+  const base = opts.route || (def.name + 's');
   const schemaDef = lookup[def.id];
 
   if (!schemaDef) {

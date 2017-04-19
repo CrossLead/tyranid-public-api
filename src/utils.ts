@@ -1,5 +1,6 @@
 import { safeDump } from 'js-yaml';
 import { Tyr } from 'tyranid';
+import { SchemaOptions } from './interfaces';
 
 /**
  * Convert a string to PascalCase
@@ -28,7 +29,7 @@ export function pascal(str: string) {
  * @param message message to throw
  */
 export function error(message: string): never {
-  throw new Error(`tyranid-swagger: ${message.replace(/\s+/g, ' ')}`);
+  throw new Error(`tyranid-open-api-spec: ${message.replace(/\s+/g, ' ')}`);
 }
 
 /**
@@ -57,4 +58,15 @@ export function each<T>(
       if (fn(obj[field], field)) break;
     }
   }
+}
+
+
+/**
+ * Get options from schema
+ *
+ * @param def tyranid collection or field definition with optional Open API opts
+ */
+export function options(def: { openAPI?: SchemaOptions }) {
+  const openAPI = def.openAPI;
+  return (typeof openAPI === 'object' && openAPI) || {};
 }

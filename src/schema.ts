@@ -1,7 +1,7 @@
 import { Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { SchemaContainer, SchemaOptions } from './interfaces';
-import { each, error, pascal } from './utils';
+import { each, error, options, pascal } from './utils';
 
 /**
  * strings for elements in property path
@@ -14,7 +14,7 @@ const PATH_MARKERS = {
 
 /**
  * Given a tyranid schema, produce an object schema
- * to insert into the swagger spec.
+ * to insert into the Open API spec.
  *
  * @param def a tyranid collection schema schema object
  */
@@ -28,7 +28,7 @@ export function schema(
     id: def.id,
     schema: {
       type: 'object',
-      properties: swaggerObject(def.fields)
+      properties: oaiObject(def.fields)
     }
   };
 
@@ -51,19 +51,19 @@ function extendPath(
 }
 
 /**
- * Convert hash of tyranid fields to hash of swagger schema
+ * Convert hash of tyranid fields to hash of Open API schema
  *
  * @param fields hash of tyranid field instances
  * @param path property path in schema of current field hash
  */
-function swaggerObject(
+function oaiObject(
   fields: { [key: string]: Tyr.FieldInstance },
   path?: string
 ) {
   const properties: { [key: string]: Schema } = {};
 
   each(fields, (field, name) => {
-    properties[name] = swaggerType(
+    properties[name] = oaiType(
       field, extendPath(name, path)
     );
   });
@@ -72,12 +72,12 @@ function swaggerObject(
 }
 
 /**
- * Translate a tyranid field to a swagger definition
+ * Translate a tyranid field to a Open API definition
  *
  * @param field tyranid schema field
  * @param path property path in schema of current field
  */
-function swaggerType(
+function oaiType(
   field: Tyr.FieldInstance,
   path: string
 ) {
@@ -86,8 +86,7 @@ function swaggerType(
     ? 'string'
     : field.def.is;
 
-  const swagger = field.def.swagger;
-  const opts: SchemaOptions = ((typeof swagger === 'object' && swagger) || {});
+  const opts = options(field.def);
 
   const schemaObj: Schema = {};
 
@@ -129,7 +128,7 @@ function swaggerType(
 
       Object.assign(schemaObj, {
         type: 'array',
-        items: swaggerType(element, extendPath(PATH_MARKERS.ARRAY, path))
+        items: oaiType(element, extendPath(PATH_MARKERS.ARRAY, path))
       });
       break;
     }
@@ -160,7 +159,7 @@ function swaggerType(
         // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
         // pull in new typings and remove any cast.
         /* tslint:disable */
-        (<any> schemaObj).additionalProperties = swaggerType(
+        (<any> schemaObj).additionalProperties = oaiType(
           values,
           extendPath(PATH_MARKERS.HASH, path)
         );
@@ -179,7 +178,7 @@ function swaggerType(
         );
       }
 
-      schemaObj.properties = swaggerObject(subfields, path);
+      schemaObj.properties = oaiObject(subfields, path);
 
       break;
     }

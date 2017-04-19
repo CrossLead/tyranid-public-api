@@ -1,1 +1,1 @@
-## Swagger API spec generator for Tyranid
+## Open API / Swagger spec generator for Tyranid

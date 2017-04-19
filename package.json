@@ -1,7 +1,7 @@
 {
-  "name": "tyranid-swagger",
+  "name": "tyranid-open-api-spec",
   "version": "0.0.0",
-  "description": "Swagger API spec generator for tyranid",
+  "description": "Open API spec generator for tyranid",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
@@ -15,6 +15,7 @@
   "keywords": [
     "tyranid",
     "swagger",
+    "openapi",
     "api"
   ],
   "author": "bsouthga@gmail.com",

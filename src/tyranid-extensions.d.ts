@@ -11,22 +11,22 @@ declare module 'tyranid' {
     interface CollectionDefinitionHydrated {
 
       /**
-       * Swagger api spec generation options for collection as a whole.
+       * Open API spec generation options for collection as a whole.
        * can be boolean to add all default routes or object
        * for more granular control.
        */
-      swagger?: SchemaOptions;
+      openAPI?: SchemaOptions;
 
     }
 
     interface FieldDefinition {
 
       /**
-       * Swagger api spec generation options for specific field.
+       * Open API spec generation options for specific field.
        * Can be boolean to add all default routes or object
        * for more granular control.
        */
-      swagger?: SchemaOptions;
+      openAPI?: SchemaOptions;
 
     }
 

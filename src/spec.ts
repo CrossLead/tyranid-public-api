@@ -3,23 +3,23 @@ import { Tyr as Tyranid } from 'tyranid';
 import { Options, SchemaContainer } from './interfaces';
 import { path } from './path';
 import { schema } from './schema';
-import { yaml } from './utils';
+import { options, yaml } from './utils';
 
 
 /**
- * Given an instance of tyranid, create a swagger api spec
+ * Given an instance of tyranid, create a Open API api spec
  *
  * @param Tyr initialized tyranid object
  * @param options schema generation options
  */
-export function spec(Tyr: typeof Tyranid, options?: Options & { yaml: true }): string;
-export function spec(Tyr: typeof Tyranid, options?: Options & { yaml: void | false }): Spec;
-export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string {
+export function spec(Tyr: typeof Tyranid, opts?: Options & { yaml: true }): string;
+export function spec(Tyr: typeof Tyranid, opts?: Options & { yaml: void | false }): Spec;
+export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   const {
     version = "1.0.0",
-    description = "Public API generated from tyranid-swagger",
+    description = "Public API generated from tyranid-open-api-spec",
     title = "Public API"
-  } = options;
+  } = opts;
 
   const spec = {
     swagger: "2.0",
@@ -33,10 +33,10 @@ export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string 
   };
 
   const lookup = {} as {[key: string]: SchemaContainer };
-  const collections = Tyr.collections.filter(c => !!c.def.swagger);
+  const collections = Tyr.collections.filter(c => c.def.openAPI);
 
   /**
-   * create swagger object schemas for relevant collections / properties
+   * create Open API object schemas for relevant collections / properties
    */
   collections.forEach(col => {
     const result = schema(col.def);
@@ -55,5 +55,5 @@ export function spec(Tyr: typeof Tyranid, options: Options = {}): Spec | string 
     }
   });
 
-  return options.yaml ? yaml(spec) : spec;
+  return opts.yaml ? yaml(spec) : spec;
 }
