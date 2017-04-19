@@ -39,7 +39,7 @@ test('should generate correct definition from schema with nesting', async (t) =>
   t.deepEqual(s.schema.properties!.nestedMapArray.type, 'array');
 });
 
-test('should generate correct definition from schema with nesting', async (t) => {
+test('should generate spec that passes validation', async (t) => {
   const result = validate(spec(Tyr));
   t.true(result);
 });
