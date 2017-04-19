@@ -1,4 +1,4 @@
-import { Path } from 'swagger-schema-official';
+import { Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { PathContainer, SchemaContainer } from './interfaces';
 import { each, error, options, pascal } from './utils';
@@ -30,6 +30,13 @@ export function path(
     paths: [] as { route: string, path: Path }[]
   };
 
+  const common = {
+    produces: [
+      'application/json',
+      'application/xml'
+    ]
+  };
+
   const schemaRef = {
     $ref: `#/definitions/${schemaDef.name}`
   };
@@ -58,15 +65,15 @@ export function path(
    */
   if (includeMethod('get')) {
     baseRoutes.path.get = {
+      ...common,
       summary: `retrieve multiple ${schemaDef.name} objects`,
       responses: {
-        200: {
-          description: `array of ${schemaDef.name} objects`,
-          schema: {
-            type: 'array',
-            items: schemaRef
-          }
-        }
+        ...denied(),
+        ...invalid(),
+        ...success(`array of ${schemaDef.name} objects`, {
+          type: 'array',
+          items: schemaRef
+        })
       }
     };
   }
@@ -87,15 +94,15 @@ export function path(
    */
   if (includeMethod('get')) {
     singleIdRoutes.path.get = {
+      ...common,
       summary: 'retrieve an individual ${schemaDef.name} object',
       parameters: [
         idParameter
       ],
       responses: {
-        200: {
-          description: `sends the ${schemaDef.name} object`,
-          schema: schemaRef
-        }
+        ...denied(),
+        ...invalid(),
+        ...success(`sends the ${schemaDef.name} object`, schemaRef)
       }
     };
   }
@@ -110,9 +117,9 @@ export function path(
         idParameter
       ],
       responses: {
-        200: {
-          description: `deletes the ${schemaDef.name} object`
-        }
+        ...denied(),
+        ...invalid(),
+        ...success(`deletes the ${schemaDef.name} object`)
       }
     };
   }
@@ -123,4 +130,43 @@ export function path(
   out.paths = out.paths.filter(p => !!Object.keys(p.path).length);
 
   return out;
+}
+
+/**
+ * create a 403 response
+ *
+ * @param description message for denial
+ */
+function denied(description = 'permission denied') {
+  return { 403: { description } };
+}
+
+/**
+ * create a 200 response
+ * @param description success message
+ * @param schema [optional] schema of response body
+ */
+function success(
+  description: string,
+  schema?: Schema
+) {
+  return {
+    200: {
+      description,
+      ...(schema ? { schema } : {})
+    }
+  };
+}
+
+/**
+ * create a 400 error object
+ *
+ * @param description response message
+ */
+function invalid(description = 'invalid request') {
+  return {
+    400: {
+      description
+    }
+  };
 }

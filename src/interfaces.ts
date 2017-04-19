@@ -77,4 +77,16 @@ export interface Options {
    * return yaml string
    */
   yaml?: boolean;
+  /**
+   * terms of service for the api
+   */
+  termsOfService?: string;
+  /**
+   * contact information for api
+   */
+  contact?: {
+    email: string;
+    url: string;
+    name: string;
+  };
 }
