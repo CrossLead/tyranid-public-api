@@ -24,7 +24,6 @@
     "object-literal-sort-keys": false,
     "curly": false,
     "arrow-parens": false,
-    "array-type": [ false ],
-    "no-consecutive-blank-lines": [ false ]
+    "array-type": [ false ]
   }
 }

@@ -5,7 +5,6 @@ import { path } from './path';
 import { schema } from './schema';
 import { options, yaml } from './utils';
 
-
 /**
  * Given an instance of tyranid, create a Open API api spec
  *

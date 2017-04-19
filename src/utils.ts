@@ -62,7 +62,6 @@ export function each<T>(
   }
 }
 
-
 /**
  * Get options from schema
  *
@@ -72,7 +71,6 @@ export function options(def: { openAPI?: SchemaOptions }) {
   const openAPI = def.openAPI;
   return (typeof openAPI === 'object' && openAPI) || {};
 }
-
 
 /**
  * Validate a spec against the openAPI spec schema

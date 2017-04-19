@@ -1,6 +1,5 @@
 import { Path, Schema } from 'swagger-schema-official';
 
-
 /**
  * Open API options listed in tyranid schema annotations
  */
@@ -27,7 +26,6 @@ export type SchemaOptions = boolean | {
   route?: string;
 };
 
-
 /**
  * container object for a generated Open API path
  */
@@ -39,7 +37,6 @@ export interface PathContainer {
   }[];
 }
 
-
 /**
  * container object for a generated Open API schema
  */
@@ -48,7 +45,6 @@ export interface SchemaContainer {
   id: string;
   schema: Schema;
 }
-
 
 /**
  * additional properties on tyranid schema
@@ -60,7 +56,6 @@ export interface SchemaAnnotation {
    */
   public?: boolean;
 }
-
 
 /**
  * options for spec generation
