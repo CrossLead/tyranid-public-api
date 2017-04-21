@@ -90,3 +90,11 @@ export interface Options {
     name: string;
   };
 }
+
+/**
+ * options for express app generation
+ */
+export interface ExpressOptions extends Options {
+  handlerPath: string;
+  docsPath: string;
+}

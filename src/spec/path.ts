@@ -1,8 +1,8 @@
 import { Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { PathContainer, SchemaContainer } from './interfaces';
+import { PathContainer, SchemaContainer } from '../interfaces';
+import { each, error, options, pascal } from '../utils';
 import { requireScopes } from './security';
-import { each, error, options, pascal } from './utils';
 
 /**
  * Given a tyranid schema, produce an object path

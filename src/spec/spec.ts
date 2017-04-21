@@ -7,10 +7,10 @@ import {
 } from 'swagger-schema-official';
 
 import { Tyr as Tyranid } from 'tyranid';
-import { Options, SchemaContainer } from './interfaces';
+import { Options, SchemaContainer } from '../interfaces';
+import { options, yaml } from '../utils';
 import { path } from './path';
 import { schema } from './schema';
-import { options, yaml } from './utils';
 
 import {
   collectionScopes,

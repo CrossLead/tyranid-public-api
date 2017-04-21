@@ -1,7 +1,7 @@
 import { Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { SchemaContainer, SchemaOptions } from './interfaces';
-import { each, error, options, pascal } from './utils';
+import { SchemaContainer, SchemaOptions } from '../interfaces';
+import { each, error, options, pascal } from '../utils';
 
 /**
  * strings for elements in property path
