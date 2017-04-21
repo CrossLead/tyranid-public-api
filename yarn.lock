@@ -37,7 +37,7 @@
     ansi-styles "^2.2.1"
     esutils "^2.0.2"
 
-"@types/ajv@1.0.0":
+"@types/ajv@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/ajv/-/ajv-1.0.0.tgz#4fb2440742f2f6c30e7fb0797b839fc6f696682a"
   dependencies:
@@ -49,7 +49,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/express@*", "@types/express@4.0.35":
+"@types/express@*", "@types/express@^4.0.35":
   version "4.0.35"
   resolved "https://registry.yarnpkg.com/@types/express/-/express-4.0.35.tgz#6267c7b60a51fac473467b3c4a02cd1e441805fe"
   dependencies:
@@ -92,9 +92,9 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@types/swagger-schema-official@2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.2.tgz#61b14d18862b80eb99f3f2799fabe11986fb3b5d"
+"@types/swagger-schema-official@^2.0.2":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.3.tgz#5480e25861fdeecb4b60d5aea0189ce30c8e8ae6"
 
 "@types/swaggerize-express@4.0.28":
   version "4.0.28"
@@ -113,16 +113,16 @@ accepts@~1.3.3:
     mime-types "~2.1.11"
     negotiator "0.6.1"
 
-ajv@*, ajv@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.0.0.tgz#a2c717764e8036d15fd227b070ddaf7867ab413a"
+ajv@*, ajv@^4.9.1:
+  version "4.11.6"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.6.tgz#947e93049790942b2a2d60a8289b28924d39f987"
   dependencies:
     co "^4.6.0"
     json-stable-stringify "^1.0.1"
 
-ajv@^4.9.1:
-  version "4.11.6"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.6.tgz#947e93049790942b2a2d60a8289b28924d39f987"
+ajv@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.0.0.tgz#a2c717764e8036d15fd227b070ddaf7867ab413a"
   dependencies:
     co "^4.6.0"
     json-stable-stringify "^1.0.1"
@@ -1588,7 +1588,7 @@ expand-range@^1.8.1:
   dependencies:
     fill-range "^2.1.0"
 
-express@4.15.2:
+express@^4.15.2:
   version "4.15.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.15.2.tgz#af107fc148504457f2dca9a6f2571d7129b97b35"
   dependencies:
@@ -2268,7 +2268,7 @@ js-tokens@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.1.tgz#08e9f132484a2c45a30907e9dc4d5567b7f114d7"
 
-js-yaml@3.8.3, js-yaml@^3.2.6, js-yaml@^3.8.2:
+js-yaml@^3.2.6, js-yaml@^3.8.2, js-yaml@^3.8.3:
   version "3.8.3"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.8.3.tgz#33a05ec481c850c8875929166fe1beb61c728766"
   dependencies:
@@ -3401,15 +3401,11 @@ supports-color@^3.2.3:
   dependencies:
     has-flag "^1.0.0"
 
-swagger-schema-official@2.0.0-bab6bed:
-  version "2.0.0-bab6bed"
-  resolved "https://registry.yarnpkg.com/swagger-schema-official/-/swagger-schema-official-2.0.0-bab6bed.tgz#70070468d6d2977ca5237b2e519ca7d06a2ea3fd"
-
-swagger-schema-official@^2.0.0-:
+swagger-schema-official@^2.0.0-, swagger-schema-official@^2.0.0-bab6bed:
   version "2.0.0-d79c205"
   resolved "https://registry.yarnpkg.com/swagger-schema-official/-/swagger-schema-official-2.0.0-d79c205.tgz#465e81bedf5d4874a423ef3c6041c606bbc3f2fd"
 
-swaggerize-express@4.0.5:
+swaggerize-express@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/swaggerize-express/-/swaggerize-express-4.0.5.tgz#16ce89726051c3e1263879e1b9190b4ecb301740"
   dependencies:
