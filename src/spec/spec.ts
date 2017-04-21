@@ -8,7 +8,7 @@ import {
 
 import { Tyr as Tyranid } from 'tyranid';
 import { Options, SchemaContainer } from '../interfaces';
-import { options, yaml } from '../utils';
+import { error, options, validate, yaml } from '../utils';
 import { path } from './path';
 import { schema } from './schema';
 
@@ -34,7 +34,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
 
   const oauth2Scopes = {};
 
-  const spec = {
+  const specObject = {
     swagger: "2.0",
     info: {
       description,
@@ -57,7 +57,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   collections.forEach(col => {
     const result = schema(col.def);
     lookup[result.id] = result;
-    spec.definitions[result.name] = result.schema;
+    specObject.definitions[result.name] = result.schema;
 
     // add scopes for this collection
     Object.assign(oauth2Scopes, collectionScopes(result.name));
@@ -70,13 +70,26 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     const result = path(col.def, lookup);
     const paths = result.paths;
     for (const p of paths) {
-      spec.paths[p.route] = p.path;
+      specObject.paths[p.route] = p.path;
     }
   });
 
-  Object.assign(spec, {
+  Object.assign(specObject, {
     securityDefinitions: createSecurityDefinitions(oauth2Scopes)
   });
 
-  return opts.yaml ? yaml(spec) : spec;
+  const result = validate(specObject);
+
+  /**
+   * validate schema before returning
+   */
+  if (!result.valid) {
+    console.log(result.errors);
+    return error(`
+      generated schema is invalid, inspect schema annotations for problems
+      or file an issue at https://github.com/CrossLead/tyranid-openapi/issues
+    `);
+  }
+
+  return opts.yaml ? yaml(specObject) : specObject;
 }
