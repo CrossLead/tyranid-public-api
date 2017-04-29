@@ -29,7 +29,8 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   const {
     version = "1.0.0",
     description = "Public API generated from tyranid-open-api-spec",
-    title = "Public API"
+    title = "Public API",
+    host = "http://localhost:9000"
   } = opts;
 
   const oauth2Scopes = {};
@@ -58,9 +59,6 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     const result = schema(col.def);
     lookup[result.id] = result;
     specObject.definitions[result.name] = result.schema;
-
-    // add scopes for this collection
-    Object.assign(oauth2Scopes, collectionScopes(result.name));
   });
 
   /**
@@ -72,10 +70,16 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     for (const p of paths) {
       specObject.paths[p.route] = p.path;
     }
+
+    // add scopes for this collection
+    Object.assign(
+      oauth2Scopes,
+      collectionScopes(result.base, lookup[result.id].name)
+    );
   });
 
   Object.assign(specObject, {
-    securityDefinitions: createSecurityDefinitions(oauth2Scopes)
+    securityDefinitions: createSecurityDefinitions(host, oauth2Scopes)
   });
 
   const result = validate(specObject);

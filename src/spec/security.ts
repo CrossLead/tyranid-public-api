@@ -5,14 +5,15 @@ export type AuthScope = 'read' | 'write';
 /**
  * create security configuration given a hash of scopes
  *
+ * @param host api host url
  * @param scopes hash of scopes
  */
-export function createSecurityDefinitions(scopes: { [key: string]: string }) {
+export function createSecurityDefinitions(host: string, scopes: { [key: string]: string }) {
   return {
     oauth2: {
       type: "oauth2",
-      authorizationUrl: "http://api.example.com/api/auth/",
-      tokenUrl: "http://api.example.com/api/token/",
+      authorizationUrl: `${host}/oauth2/authorize`,
+      tokenUrl: `${host}/oauth2/token`,
       flow: "accessCode",
       scopes
     }
@@ -24,10 +25,10 @@ export function createSecurityDefinitions(scopes: { [key: string]: string }) {
  *
  * @param name name of api object
  */
-export function collectionScopes(name: string) {
+export function collectionScopes(route: string, name: string) {
   return {
-    [`read:${name}`]: `Read access to ${name} objects`,
-    [`write:${name}`]: `Write access to ${name} objects`
+    [`read:${route}`]: `Read access to ${name} objects`,
+    [`write:${route}`]: `Write access to ${name} objects`
   };
 }
 
@@ -37,7 +38,7 @@ export function collectionScopes(name: string) {
  * @param name api object name
  * @param scopes list of scopes to require
  */
-export function requireScopes(name: string, scopes: AuthScope | AuthScope[]) {
+export function requireScopes(route: string, scopes: AuthScope | AuthScope[]) {
   scopes = Array.isArray(scopes) ? scopes : [ scopes ];
 
   // TODO: fix typings
@@ -45,7 +46,7 @@ export function requireScopes(name: string, scopes: AuthScope | AuthScope[]) {
   return {
     security: (
       scopes.map(scope => {
-        return { oauth2: [`${scope}:${name}`] }
+        return { oauth2: [`${scope}:${route}`] }
       }) as any
     ) as Security[]
   };

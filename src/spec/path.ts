@@ -1,4 +1,4 @@
-import { Path, Schema } from 'swagger-schema-official';
+import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
@@ -17,7 +17,8 @@ export function path(
   const opts = options(def);
   const methods = new Set(opts.methods || [ 'all' ]);
   const includeMethod = (route: string) => methods.has(route) || methods.has('all');
-  const base = opts.route || (def.name + 's');
+  const baseCollectionName = opts.name || (def.name + 's');
+  const baseCollectionRoute = opts.route || baseCollectionName;
   const schemaDef = lookup[def.id];
 
   if (!schemaDef) {
@@ -30,6 +31,7 @@ export function path(
 
   const out = {
     id: def.id,
+    base: baseCollectionName,
     paths: [] as { route: string, path: Path }[]
   };
 
@@ -40,11 +42,20 @@ export function path(
     ]
   };
 
+  const parameters = (...params: Parameter[]) => {
+    return {
+      parameters: [
+        ...(opts.routeParams || []),
+        ...params
+      ]
+    };
+  };
+
   const schemaRef = {
     $ref: `#/definitions/${name}`
   };
 
-  const idParameter = {
+  const idParameter: Parameter = {
     name: 'id',
     in: 'path',
     type: 'string',
@@ -58,7 +69,7 @@ export function path(
    *
    */
   const baseRoutes = {
-    route: `/${base}`,
+    route: `/${baseCollectionRoute}`,
     path: {} as Path
   };
   out.paths.push(baseRoutes);
@@ -69,7 +80,8 @@ export function path(
   if (includeMethod('get')) {
     baseRoutes.path.get = {
       ...common,
-      ...requireScopes(name, 'read'),
+      ...parameters(),
+      ...requireScopes(baseCollectionName, 'read'),
       summary: `retrieve multiple ${name} objects`,
       // TODO: fix typings
       responses: {
@@ -89,7 +101,7 @@ export function path(
    *
    */
   const singleIdRoutes = {
-    route: `/${base}/{id}`,
+    route: `/${baseCollectionRoute}/{id}`,
     path: {} as Path
   };
   out.paths.push(singleIdRoutes);
@@ -101,10 +113,8 @@ export function path(
     singleIdRoutes.path.get = {
       summary: `retrieve an individual ${name} object`,
       ...common,
-      ...requireScopes(name, 'read'),
-      parameters: [
-        idParameter
-      ],
+      ...requireScopes(baseCollectionName, 'read'),
+      ...parameters(idParameter),
       responses: {
         ...denied(),
         ...invalid(),
@@ -118,11 +128,9 @@ export function path(
    */
   if (includeMethod('delete')) {
     singleIdRoutes.path.delete = {
-      ...requireScopes(name, 'write'),
       summary: `delete an individual ${name} object`,
-      parameters: [
-        idParameter
-      ],
+      ...requireScopes(baseCollectionName, 'write'),
+      ...parameters(idParameter),
       responses: {
         ...denied(),
         ...invalid(),

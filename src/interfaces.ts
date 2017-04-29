@@ -1,29 +1,33 @@
-import { Path, Schema } from 'swagger-schema-official';
+import { Parameter, Path, Schema } from 'swagger-schema-official';
 
 /**
  * Open API options listed in tyranid schema annotations
  */
 export type SchemaOptions = boolean | {
-
   /**
    * methods to generate for this field
    */
-  methods?: Array<'get' | 'post' | 'put' | 'delete'>;
-
+  methods?: ('get' | 'post' | 'put' | 'delete')[];
   /**
    * description to use instead of the main field note
    */
   note?: string;
-
   /**
    * scopes required for this field
    */
   scopes?: string[];
-
   /**
-   * custom route name for collection
+   * custom name for collection
+   */
+  name?: string;
+  /**
+   * custom route for collection
    */
   route?: string;
+  /**
+   * parameter definitions for route if necessary
+   */
+  routeParams?: Parameter[]
 };
 
 /**
@@ -31,6 +35,7 @@ export type SchemaOptions = boolean | {
  */
 export interface PathContainer {
   id: string;
+  base: string;
   paths: {
     route: string,
     path: Path;
@@ -81,6 +86,10 @@ export interface Options {
    * terms of service for the api
    */
   termsOfService?: string;
+  /**
+   * api host base url (defaults to http://localhost:9000)
+   */
+  host?: string;
   /**
    * contact information for api
    */

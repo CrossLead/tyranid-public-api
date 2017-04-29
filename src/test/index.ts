@@ -42,7 +42,7 @@ test('should generate correct definition from schema with nesting', async (t) =>
 test('should generate spec that passes validation', async (t) => {
   const s = spec(Tyr);
   /* tslint:disable */
-  require('fs').writeFileSync('./test-spec.yaml', yaml(s))
+  require('fs').writeFileSync('./.tmp/test-spec.yaml', yaml(s))
   /* tslint:enable */
   t.pass();
 });

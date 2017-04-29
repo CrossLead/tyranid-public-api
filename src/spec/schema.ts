@@ -92,24 +92,32 @@ function schemaType(
   switch (type) {
 
     /**
-     * pass through types from tyranid
+     * string aliases
      */
     case 'password':
-    case 'boolean':
-    case 'integer':
-    case 'double':
     case 'string':
-    case 'date': {
-      Object.assign(out, { type });
+    case 'uid':
+    case 'mongoid':
+    case 'date':
+    case 'email': {
+      Object.assign(out, { type: 'string' });
+      break;
+    }
+
+    case 'float':
+    case 'double': {
+      Object.assign(out, {
+        type: 'number'
+      });
       break;
     }
 
     /**
-     * string aliases
+     * pass through types from tyranid
      */
-    case 'mongoid':
-    case 'email': {
-      Object.assign(out, { type: 'string' });
+    case 'boolean':
+    case 'integer': {
+      Object.assign(out, { type });
       break;
     }
 
@@ -188,7 +196,15 @@ function schemaType(
   /**
    * add formats
    */
-  switch (out.type) {
+  switch (type) {
+
+    case 'date':
+    case 'password':
+    case 'float':
+    case 'double': {
+      out.format = type;
+      break;
+    }
 
     case 'integer': {
       out.format = 'i32';

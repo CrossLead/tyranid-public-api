@@ -3,4 +3,5 @@ dist
 npm-*
 .DS_Store
 test-spec.yaml
-tyranid-oai-test
+api-test
+.tmp

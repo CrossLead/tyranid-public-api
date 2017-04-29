@@ -1,8 +1,13 @@
 import * as AJV from 'ajv';
 import { safeDump } from 'js-yaml';
-import { Spec } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { SchemaOptions } from './interfaces';
+
+import {
+  Parameter,
+  Schema,
+  Spec
+} from 'swagger-schema-official';
 
 /**
  * Convert a string to PascalCase
@@ -67,7 +72,34 @@ export function each<T>(
  */
 export function options(def: { openAPI?: SchemaOptions }) {
   const openAPI = def.openAPI;
-  return (typeof openAPI === 'object' && openAPI) || {};
+  const opts = (typeof openAPI === 'object' && openAPI) || {};
+  const params = /{/g;
+  const idParam = /{id}/g;
+
+  /**
+   *
+   * opts validation
+   *
+   */
+
+  if (opts.route && idParam.test(opts.route)) {
+    return error(`
+      can't use {id} as a parameter in a custom route ("${opts.route}"),
+      as it will be used for the collection endpoints.
+    `);
+  }
+
+  /**
+   * TODO: validate that schema is provided for each param listed in custom route
+   */
+  if (opts.route && params.test(opts.route) && !opts.routeParams) {
+    return error(`
+      openAPI options lists custom route ("${opts.route}") with parameter,
+      but doesn't provide a definition for the parameter.
+    `);
+  }
+
+  return opts;
 }
 
 /**
