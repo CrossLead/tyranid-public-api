@@ -54,13 +54,14 @@ export function yaml(obj: object) {
  * @param obj javascript object
  * @param fn iteree function
  */
-export function each<T>(
+export function each<T, S>(
   obj: { [key: string]: T },
-  fn: (element: T, field: string) => boolean | void
+  fn: (element: T, field: string) => S
 ) {
   for (const field in obj) {
     if (obj.hasOwnProperty(field)) {
-      if (fn(obj[field], field)) break;
+      const result = fn(obj[field], field);
+      if (typeof result !== 'undefined') return result;
     }
   }
 }
@@ -73,31 +74,6 @@ export function each<T>(
 export function options(def: { openAPI?: SchemaOptions }) {
   const openAPI = def.openAPI;
   const opts = (typeof openAPI === 'object' && openAPI) || {};
-  const params = /{/g;
-  const idParam = /{id}/g;
-
-  /**
-   *
-   * opts validation
-   *
-   */
-
-  if (opts.route && idParam.test(opts.route)) {
-    return error(`
-      can't use {id} as a parameter in a custom route ("${opts.route}"),
-      as it will be used for the collection endpoints.
-    `);
-  }
-
-  /**
-   * TODO: validate that schema is provided for each param listed in custom route
-   */
-  if (opts.route && params.test(opts.route) && !opts.routeParams) {
-    return error(`
-      openAPI options lists custom route ("${opts.route}") with parameter,
-      but doesn't provide a definition for the parameter.
-    `);
-  }
 
   return opts;
 }

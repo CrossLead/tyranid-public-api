@@ -4,7 +4,9 @@ export default new Tyr.Collection({
   id: 't00',
   name: 'test',
   dbName: 'test',
-  openAPI: true,
+  openAPI: {
+    childOf: 'linked'
+  },
   fields: {
     _id: { is: 'mongoid' },
     name: { is: 'string' },

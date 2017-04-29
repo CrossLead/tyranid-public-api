@@ -21,10 +21,13 @@ const PATH_MARKERS = {
 export function schema(
   def: Tyr.CollectionDefinitionHydrated,
 ) {
-  const name = pascal(def.name);
+  const opts = options(def);
+  const name = opts.name || def.name;
+  const pascalName = pascal(name);
 
   const out: SchemaContainer = {
     name,
+    pascalName,
     id: def.id,
     schema: {
       type: 'object',

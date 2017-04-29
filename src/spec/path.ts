@@ -17,8 +17,67 @@ export function path(
   const opts = options(def);
   const methods = new Set(opts.methods || [ 'all' ]);
   const includeMethod = (route: string) => methods.has(route) || methods.has('all');
-  const baseCollectionName = opts.name || (def.name + 's');
-  const baseCollectionRoute = opts.route || baseCollectionName;
+  const pluralize = (str: string) => str + 's';
+  const baseCollectionName = pluralize(def.name);
+  const baseRouteParameters: Parameter[] = [];
+
+  let baseCollectionRoute = baseCollectionName;
+
+  let parentScopeBase = '';
+
+  /**
+   * find id linking to parent
+   */
+  if (opts.childOf) {
+    const parentField = each(def.fields, (field, name) => {
+      if (field.link && field.link.def.name === opts.childOf) {
+        return { field, name };
+      }
+    });
+
+    if (!parentField) {
+      return error(`
+        collection ${def.name} has no property linking
+        to collection ${opts.childOf}
+      `);
+    }
+
+    const parentId = parentField.field.link!.def.id;
+    const parentDef = lookup[parentId];
+    if (!parentDef) {
+      return error(`
+        parent collection (${parentField.field.link!.def.name})
+        is not exposed to the public api
+      `);
+    }
+
+    /**
+     * add route parameter
+     */
+    baseRouteParameters.push({
+      name: parentField.name,
+      type: 'string',
+      in: 'path',
+      required: true,
+      description: 'ID of linked ' + parentDef.name
+    });
+
+    parentScopeBase = pluralize(parentDef.name);
+
+    /**
+     * add route base
+     *
+     * TODO: we probably want to topologically sort the routes
+     *       so we can create parent routes first and then
+     *       append child routes to the created parent route
+     */
+    baseCollectionRoute = [
+      pluralize(parentDef.name),
+      `{${parentField.name}}`,
+      baseCollectionRoute
+    ].join('/');
+  }
+
   const schemaDef = lookup[def.id];
 
   if (!schemaDef) {
@@ -45,10 +104,21 @@ export function path(
   const parameters = (...params: Parameter[]) => {
     return {
       parameters: [
-        ...(opts.routeParams || []),
+        ...baseRouteParameters,
         ...params
       ]
     };
+  };
+
+  const addScopes = (scope: 'read' | 'write') => {
+    const scopes = [
+      baseCollectionName + ':' + scope
+    ];
+
+    if (parentScopeBase) {
+      scopes.unshift(parentScopeBase + ':' + scope);
+    }
+    return requireScopes(...scopes);
   };
 
   const schemaRef = {
@@ -81,9 +151,8 @@ export function path(
     baseRoutes.path.get = {
       ...common,
       ...parameters(),
-      ...requireScopes(baseCollectionName, 'read'),
+      ...addScopes('read'),
       summary: `retrieve multiple ${name} objects`,
-      // TODO: fix typings
       responses: {
         ...denied(),
         ...invalid(),
@@ -113,7 +182,7 @@ export function path(
     singleIdRoutes.path.get = {
       summary: `retrieve an individual ${name} object`,
       ...common,
-      ...requireScopes(baseCollectionName, 'read'),
+      ...addScopes('read'),
       ...parameters(idParameter),
       responses: {
         ...denied(),
@@ -129,7 +198,7 @@ export function path(
   if (includeMethod('delete')) {
     singleIdRoutes.path.delete = {
       summary: `delete an individual ${name} object`,
-      ...requireScopes(baseCollectionName, 'write'),
+      ...addScopes('write'),
       ...parameters(idParameter),
       responses: {
         ...denied(),

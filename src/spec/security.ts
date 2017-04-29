@@ -1,7 +1,5 @@
 import { Security } from 'swagger-schema-official';
 
-export type AuthScope = 'read' | 'write';
-
 /**
  * create security configuration given a hash of scopes
  *
@@ -38,17 +36,11 @@ export function collectionScopes(route: string, name: string) {
  * @param name api object name
  * @param scopes list of scopes to require
  */
-export function requireScopes(route: string, scopes: AuthScope | AuthScope[]) {
-  scopes = Array.isArray(scopes) ? scopes : [ scopes ];
-
+export function requireScopes(...scopes: string[]) {
   // TODO: fix typings
   /* tslint:disable */
   return {
-    security: (
-      scopes.map(scope => {
-        return { oauth2: [`${scope}:${route}`] }
-      }) as any
-    ) as Security[]
+    security: ([{ oauth2: scopes }] as any) as Security[]
   };
   /* tslint:enable */
 }

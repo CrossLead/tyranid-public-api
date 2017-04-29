@@ -30,12 +30,12 @@ test('pascalCase should return correct values', (t) => {
 
 test('should generate correct definition from schema', async (t) => {
   const s = schema(Tyr.byName.user.def);
-  t.deepEqual(s.name, 'User');
+  t.deepEqual(s.pascalName, 'User');
 });
 
 test('should generate correct definition from schema with nesting', async (t) => {
   const s = schema(Tyr.byName.test.def);
-  t.deepEqual(s.name, 'Test');
+  t.deepEqual(s.pascalName, 'Test');
   t.deepEqual(s.schema.properties!.nestedMapArray.type, 'array');
 });
 

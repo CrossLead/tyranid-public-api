@@ -21,13 +21,13 @@ export type SchemaOptions = boolean | {
    */
   name?: string;
   /**
-   * custom route for collection
+   * whether this collection should be a
+   * child route of another (linked) collection
+   *
+   * the property containing the id linking to the parent
+   * should be passed as this property.
    */
-  route?: string;
-  /**
-   * parameter definitions for route if necessary
-   */
-  routeParams?: Parameter[]
+  childOf?: string;
 };
 
 /**
@@ -47,6 +47,7 @@ export interface PathContainer {
  */
 export interface SchemaContainer {
   name: string;
+  pascalName: string;
   id: string;
   schema: Schema;
 }

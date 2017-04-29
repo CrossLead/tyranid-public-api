@@ -58,7 +58,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   collections.forEach(col => {
     const result = schema(col.def);
     lookup[result.id] = result;
-    specObject.definitions[result.name] = result.schema;
+    specObject.definitions[result.pascalName] = result.schema;
   });
 
   /**
