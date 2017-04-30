@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "test": "bash -c \"rm -rf ./dist/ && npm run lint:fix && npm run build && npm run ava\"",
+    "test": "bash -c \"mkdir -p ./.tmp/ && rm -rf ./dist/ && npm run lint:fix && npm run build && npm run ava\"",
     "docs:generate": "rm -rf ./docs/ && typedoc --mode file --out ./docs/ ./src/ && touch ./docs/.nojekyll",
     "docs:deploy": "gh-pages --dotfiles true -d ./docs/",
     "docs": "npm run docs:generate && npm run docs:deploy",
