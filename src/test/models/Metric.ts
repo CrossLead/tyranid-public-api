@@ -7,7 +7,6 @@ export default new Tyr.Collection({
   openAPI: true,
   fields: {
     _id: { is: 'mongoid' },
-    name: { is: 'string' },
-    organizationId: { link: 'organization' }
+    name: { is: 'string' }
   },
 });

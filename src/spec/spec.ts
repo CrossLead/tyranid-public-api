@@ -71,11 +71,15 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
       specObject.paths[p.route] = p.path;
     }
 
-    // add scopes for this collection
-    Object.assign(
-      oauth2Scopes,
-      collectionScopes(result.base, lookup[result.id].name)
-    );
+    const colOpts = options(col.def);
+
+    if (!colOpts.parent || !colOpts.useParentScope) {
+      // add scopes for this collection
+      Object.assign(
+        oauth2Scopes,
+        collectionScopes(result.base, lookup[result.id].name)
+      );
+    }
   });
 
   Object.assign(specObject, {

@@ -10,8 +10,9 @@ export default new Tyr.Collection({
   },
   fields: {
     _id: { is: 'mongoid' },
-    metricId: { link: 'metric' },
-    date: { is: 'date' },
-    value: { is: 'double' }
+    metricId: { link: 'metric', openAPI: true },
+    date: { is: 'date', openAPI: true },
+    value: { is: 'double', openAPI: true },
+    excludeProperty: { is: 'string' }
   },
 });

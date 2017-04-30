@@ -29,8 +29,8 @@ test('pascalCase should return correct values', (t) => {
 });
 
 test('should generate correct definition from schema', async (t) => {
-  const s = schema(Tyr.byName.user.def);
-  t.deepEqual(s.pascalName, 'User');
+  const s = schema(Tyr.byName.metric.def);
+  t.deepEqual(s.pascalName, 'Metric');
 });
 
 test('should generate spec that passes validation', async (t) => {

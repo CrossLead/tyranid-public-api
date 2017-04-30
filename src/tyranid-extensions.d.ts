@@ -1,5 +1,5 @@
 import { Tyr } from 'tyranid';
-import { SchemaOptions } from './interfaces';
+import { CollectionSchemaOptions, FieldSchemaOptions } from './interfaces';
 
 /**
  * module augmentations for tyranid
@@ -15,7 +15,7 @@ declare module 'tyranid' {
        * can be boolean to add all default routes or object
        * for more granular control.
        */
-      openAPI?: SchemaOptions;
+      openAPI?: CollectionSchemaOptions | boolean;
 
     }
 
@@ -26,7 +26,7 @@ declare module 'tyranid' {
        * Can be boolean to add all default routes or object
        * for more granular control.
        */
-      openAPI?: SchemaOptions;
+      openAPI?: FieldSchemaOptions | boolean;
 
     }
 

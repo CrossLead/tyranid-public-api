@@ -1,25 +1,29 @@
 import { Parameter, Path, Schema } from 'swagger-schema-official';
 
-/**
- * Open API options listed in tyranid schema annotations
- */
-export type SchemaOptions = boolean | {
-  /**
-   * methods to generate for this field
-   */
-  methods?: ('get' | 'post' | 'put' | 'delete')[];
+
+export interface SchemaOptions {
   /**
    * description to use instead of the main field note
    */
   note?: string;
+
   /**
-   * scopes required for this field
-   */
-  scopes?: string[];
-  /**
-   * custom name for collection
+   * custom name for field / collection
    */
   name?: string;
+}
+
+
+export interface FieldSchemaOptions extends SchemaOptions {
+
+}
+
+export interface CollectionSchemaOptions extends SchemaOptions {
+  /**
+   * methods to generate for this collection
+   */
+  methods?: ('get' | 'post' | 'put' | 'delete')[];
+
   /**
    * whether this collection should be a
    * child route of another (linked) collection
@@ -28,11 +32,13 @@ export type SchemaOptions = boolean | {
    * should be passed as this property.
    */
   parent?: string;
+
   /**
    * use parent scope for security (don't generate custom scope for this collection)
    */
   useParentScope?: true
-};
+}
+
 
 /**
  * container object for a generated Open API path
