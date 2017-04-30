@@ -1,6 +1,5 @@
 import { Parameter, Path, Schema } from 'swagger-schema-official';
 
-
 export interface SchemaOptions {
   /**
    * description to use instead of the main field note
@@ -13,9 +12,11 @@ export interface SchemaOptions {
   name?: string;
 }
 
-
 export interface FieldSchemaOptions extends SchemaOptions {
-
+  /**
+   * property should be returned / accepted by api
+   */
+  include?: 'read' | 'write';
 }
 
 export interface CollectionSchemaOptions extends SchemaOptions {
@@ -27,18 +28,14 @@ export interface CollectionSchemaOptions extends SchemaOptions {
   /**
    * whether this collection should be a
    * child route of another (linked) collection
-   *
-   * the property containing the id linking to the parent
-   * should be passed as this property.
    */
   parent?: string;
 
   /**
    * use parent scope for security (don't generate custom scope for this collection)
    */
-  useParentScope?: true
+  useParentScope?: true;
 }
-
 
 /**
  * container object for a generated Open API path

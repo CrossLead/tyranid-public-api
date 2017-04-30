@@ -2,9 +2,9 @@ import * as AJV from 'ajv';
 import { safeDump } from 'js-yaml';
 import { Tyr } from 'tyranid';
 import {
-  SchemaOptions,
   CollectionSchemaOptions,
-  FieldSchemaOptions
+  FieldSchemaOptions,
+  SchemaOptions
 } from './interfaces';
 
 import {
