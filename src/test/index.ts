@@ -33,12 +33,6 @@ test('should generate correct definition from schema', async (t) => {
   t.deepEqual(s.pascalName, 'User');
 });
 
-test('should generate correct definition from schema with nesting', async (t) => {
-  const s = schema(Tyr.byName.test.def);
-  t.deepEqual(s.pascalName, 'Test');
-  t.deepEqual(s.schema.properties!.nestedMapArray.type, 'array');
-});
-
 test('should generate spec that passes validation', async (t) => {
   const s = spec(Tyr);
   /* tslint:disable */

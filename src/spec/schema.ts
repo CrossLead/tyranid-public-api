@@ -98,6 +98,7 @@ function schemaType(
      * string aliases
      */
     case 'password':
+    case 'url':
     case 'string':
     case 'uid':
     case 'mongoid':

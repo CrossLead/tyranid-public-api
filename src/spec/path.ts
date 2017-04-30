@@ -28,9 +28,9 @@ export function path(
   /**
    * find id linking to parent
    */
-  if (opts.childOf) {
+  if (opts.parent) {
     const parentField = each(def.fields, (field, name) => {
-      if (field.link && field.link.def.name === opts.childOf) {
+      if (field.link && field.link.def.name === opts.parent) {
         return { field, name };
       }
     });
@@ -38,7 +38,7 @@ export function path(
     if (!parentField) {
       return error(`
         collection ${def.name} has no property linking
-        to collection ${opts.childOf}
+        to collection ${opts.parent}
       `);
     }
 
@@ -120,13 +120,16 @@ export function path(
   };
 
   const addScopes = (scope: 'read' | 'write') => {
-    const scopes = [
-      baseCollectionName + ':' + scope
-    ];
+    const scopes = [];
 
     if (parentScopeBase) {
-      scopes.unshift(parentScopeBase + ':' + scope);
+      scopes.push(parentScopeBase + ':' + scope);
     }
+
+    if (!parentScopeBase || !opts.useParentScope) {
+      scopes.push(baseCollectionName + ':' + scope);
+    }
+
     return requireScopes(...scopes);
   };
 

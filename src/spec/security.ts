@@ -3,6 +3,8 @@ import { Security } from 'swagger-schema-official';
 /**
  * create security configuration given a hash of scopes
  *
+ * TODO: should allow for multiple security def types
+ *
  * @param host api host url
  * @param scopes hash of scopes
  */

@@ -27,7 +27,11 @@ export type SchemaOptions = boolean | {
    * the property containing the id linking to the parent
    * should be passed as this property.
    */
-  childOf?: string;
+  parent?: string;
+  /**
+   * use parent scope for security (don't generate custom scope for this collection)
+   */
+  useParentScope?: true
 };
 
 /**
