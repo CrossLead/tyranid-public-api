@@ -6,6 +6,9 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "test": "bash -c \"rm -rf ./dist/ && npm run lint:fix && npm run build && npm run ava\"",
+    "docs:generate": "rm -rf ./docs/ && typedoc --mode file --out ./docs/ ./src/ && touch ./docs/.nojekyll",
+    "docs:deploy": "gh-pages --dotfiles true -d ./docs/",
+    "docs": "npm run docs:generate && npm run docs:deploy",
     "ava": "ava",
     "build": "tsc",
     "watch": "tsc -w",
@@ -35,8 +38,10 @@
     "@types/lodash": "4.14.62",
     "@types/node": "6.0.68",
     "ava": "0.19.1",
+    "gh-pages": "^0.12.0",
     "tslint": "5.1.0",
-    "typescript": "2.2.2",
+    "typedoc": "^0.6.0",
+    "typescript": "2.3.1",
     "tyranid": "0.1.45"
   },
   "ava": {

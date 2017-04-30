@@ -5,3 +5,4 @@ npm-*
 test-spec.yaml
 api-test
 .tmp
+docs
