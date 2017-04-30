@@ -65,6 +65,15 @@ export function path(
     parentScopeBase = pluralize(parentDef.name);
 
     /**
+     * /metrics/{metricId}/metricTargets -> /metrics/{metricId}/targets
+     */
+    let subRouteName = baseCollectionName;
+    if (baseCollectionRoute.indexOf(parentDef.name) === 0) {
+      const removed = baseCollectionRoute.replace(parentDef.name, '');
+      subRouteName = removed.charAt(0).toLocaleLowerCase() + removed.slice(1);
+    }
+
+    /**
      * add route base
      *
      * TODO: we probably want to topologically sort the routes
@@ -74,7 +83,7 @@ export function path(
     baseCollectionRoute = [
       pluralize(parentDef.name),
       `{${parentField.name}}`,
-      baseCollectionRoute
+      subRouteName
     ].join('/');
   }
 
