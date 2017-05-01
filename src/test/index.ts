@@ -3,7 +3,6 @@ import { join } from 'path';
 import { Tyr } from 'tyranid';
 
 import {
-  handlers,
   pascal,
   path,
   schema,
@@ -39,11 +38,5 @@ test('should generate spec that passes validation', async (t) => {
   /* tslint:disable */
   require('fs').writeFileSync('./.tmp/test-spec.yaml', yaml(s))
   /* tslint:enable */
-  t.pass();
-});
-
-test('should generate handlers correctly', (t) => {
-  const s = spec(Tyr);
-  console.log(handlers(Tyr, s));
   t.pass();
 });
