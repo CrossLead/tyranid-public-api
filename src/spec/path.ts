@@ -2,7 +2,7 @@ import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
-import { requireScopes } from './security';
+import { createScope, requireScopes } from './security';
 
 /**
  * Given a tyranid schema, produce an object path
@@ -123,11 +123,11 @@ export function path(
     const scopes = [];
 
     if (parentScopeBase) {
-      scopes.push(parentScopeBase + ':' + scope);
+      scopes.push(createScope(parentScopeBase, scope));
     }
 
     if (!parentScopeBase || !opts.useParentScope) {
-      scopes.push(baseCollectionName + ':' + scope);
+      scopes.push(createScope(baseCollectionName, scope));
     }
 
     return requireScopes(...scopes);

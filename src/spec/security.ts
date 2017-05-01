@@ -10,7 +10,7 @@ import { Security } from 'swagger-schema-official';
  */
 export function createSecurityDefinitions(host: string, scopes: { [key: string]: string }) {
   return {
-    oauth2: {
+    default: {
       type: "oauth2",
       authorizationUrl: `${host}/oauth2/authorize`,
       tokenUrl: `${host}/oauth2/token`,
@@ -27,8 +27,8 @@ export function createSecurityDefinitions(host: string, scopes: { [key: string]:
  */
 export function collectionScopes(route: string, name: string) {
   return {
-    [`read:${route}`]: `Read access to ${name} objects`,
-    [`write:${route}`]: `Write access to ${name} objects`
+    [createScope(route, 'read')]: `Read access to ${name} objects`,
+    [createScope(route, 'write')]: `Write access to ${name} objects`
   };
 }
 
@@ -42,7 +42,17 @@ export function requireScopes(...scopes: string[]) {
   // TODO: fix typings
   /* tslint:disable */
   return {
-    security: ([{ oauth2: scopes }] as any) as Security[]
+    security: ([{ default: scopes }] as any) as Security[]
   };
   /* tslint:enable */
+}
+
+/**
+ * properly format a scope
+ *
+ * @param collection name of collection
+ * @param access name of access type (read/write)
+ */
+export function createScope(collection: string, access: 'read' | 'write') {
+  return `${access}:${collection}`;
 }
