@@ -1,5 +1,4 @@
 node_modules
-dist
 npm-*
 .DS_Store
 test-spec.yaml
