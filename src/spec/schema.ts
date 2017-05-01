@@ -30,9 +30,10 @@ export function schema(
     pascalName,
     id: def.id,
     schema: {
+      ['x-tyranid-collection-id']: def.id,
       type: 'object',
       properties: schemaObject(def.fields)
-    }
+    } as {}
   };
 
   return out;

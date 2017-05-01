@@ -105,8 +105,7 @@ export function path(
 
   const common = {
     produces: [
-      'application/json',
-      'application/xml'
+      'application/json'
     ]
   };
 
