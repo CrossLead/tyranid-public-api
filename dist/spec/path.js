@@ -86,8 +86,7 @@ function path(def, lookup) {
     };
     const common = {
         produces: [
-            'application/json',
-            'application/xml'
+            'application/json'
         ]
     };
     const parameters = (...params) => {

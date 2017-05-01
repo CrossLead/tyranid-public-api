@@ -5,7 +5,5 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./spec/"));
-__export(require("./express/"));
 __export(require("./utils"));
-__export(require("./swaggerize"));
 //# sourceMappingURL=index.js.map

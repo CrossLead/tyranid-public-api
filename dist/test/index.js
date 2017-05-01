@@ -38,9 +38,4 @@ ava_1.default('should generate spec that passes validation', (t) => __awaiter(th
     /* tslint:enable */
     t.pass();
 }));
-ava_1.default('should generate handlers correctly', (t) => {
-    const s = _1.spec(tyranid_1.Tyr);
-    console.log(_1.handlers(tyranid_1.Tyr, s));
-    t.pass();
-});
 //# sourceMappingURL=index.js.map
