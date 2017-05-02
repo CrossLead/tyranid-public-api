@@ -4,7 +4,6 @@ import { PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
 import { createScope, requireScopes } from './security';
 
-
 /**
  * query parameters for searching
  */
@@ -34,7 +33,6 @@ const BASE_FIND_PARAMETERS = [
     description: `Ascending sort (defaults to descending).`,
   }
 ];
-
 
 /**
  * Given a tyranid schema, produce an object path
@@ -93,7 +91,7 @@ export function path(
       required: true,
       description: 'ID of linked ' + parentDef.name,
       ['x-object-id']: true
-    } as any) as Parameter);
+    } as {}) as Parameter);
 
     parentScopeBase = pluralize(parentDef.name);
 
@@ -178,9 +176,10 @@ export function path(
     in: 'path',
     type: 'string',
     description: `ID of the ${pascalName} object`,
-    ['x-object-id']: true,
     required: true
-  } as any;
+  };
+
+  (idParameter as any)['x-object-id'] = true;
 
   /**
    *
@@ -214,7 +213,6 @@ export function path(
     };
   }
 
-
   /**
    * POST /<collection>/
    */
@@ -232,7 +230,6 @@ export function path(
       }
     };
   }
-
 
   /**
    * PUT /<collection>/
@@ -255,7 +252,6 @@ export function path(
     };
   }
 
-
   /**
    * DELETE /<collection>/
    */
@@ -272,7 +268,6 @@ export function path(
       }
     };
   }
-
 
   /**
    *
@@ -303,7 +298,6 @@ export function path(
     };
   }
 
-
   /**
    * PUT /<collection>/{_id}
    */
@@ -321,7 +315,6 @@ export function path(
       }
     };
   }
-
 
   /**
    * DELETE /<collection>/{_id}

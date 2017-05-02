@@ -105,7 +105,7 @@ export interface Options {
   /**
    * schemes
    */
-  schemes?: string[],
+  schemes?: string[];
   /**
    * contact information for api
    */

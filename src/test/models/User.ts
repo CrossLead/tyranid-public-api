@@ -8,6 +8,7 @@ export default new Tyr.Collection({
     _id: { is: 'mongoid' },
     name: { is: 'string' },
     email: { is: 'email' },
+    organizationId: { is: 'mongoid' },
     skills: {
       is: 'array',
       note: `

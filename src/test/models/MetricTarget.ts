@@ -13,6 +13,7 @@ export default new Tyr.Collection({
     metricId: { link: 'metric', openAPI: true },
     date: { is: 'date', openAPI: true },
     value: { is: 'double', openAPI: true },
+    organizationId: { is: 'mongoid' },
     excludeProperty: { is: 'string' }
   },
 });

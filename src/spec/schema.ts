@@ -36,7 +36,6 @@ export function schema(
     `);
   }
 
-
   const out: SchemaContainer = {
     name,
     pascalName,

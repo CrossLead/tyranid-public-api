@@ -10,7 +10,7 @@
     "no-console": [
       false
     ],
-    "no-any": true,
+    "no-any": false,
     "semicolon": [
       true
     ],
