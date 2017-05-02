@@ -25,6 +25,18 @@ export function schema(
   const name = opts.name || def.name;
   const pascalName = pascal(name);
 
+  /**
+   * add direct check for organizationId for now,
+   * should have hook functions later
+   */
+  if (!('organizationId' in def.fields)) {
+    return error(`
+      organizationId property must exist on collection
+      to expose to public api, it does not exist on collection ${def.name}
+    `);
+  }
+
+
   const out: SchemaContainer = {
     name,
     pascalName,
@@ -67,9 +79,7 @@ function schemaObject(
   const properties: { [key: string]: Schema } = {};
 
   each(fields, (field, name) => {
-    properties[name] = schemaType(
-      field, extendPath(name, path)
-    );
+    properties[name] = schemaType(field, extendPath(name, path));
   });
 
   return properties;

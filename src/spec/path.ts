@@ -4,6 +4,38 @@ import { PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
 import { createScope, requireScopes } from './security';
 
+
+/**
+ * query parameters for searching
+ */
+const BASE_FIND_PARAMETERS = [
+  {
+    name: '$limit',
+    in: 'query',
+    type: 'number',
+    description: `Number of results to include in response (defaults to 20).`,
+  },
+  {
+    name: '$skip',
+    in: 'query',
+    type: 'number',
+    description: `Number of results to skip in search (defaults to 0).`,
+  },
+  {
+    name: '$sort',
+    in: 'query',
+    type: 'string',
+    description: `Property to sort by (defaults to _id).`,
+  },
+  {
+    name: '$ascend',
+    in: 'query',
+    type: 'boolean',
+    description: `Ascending sort (defaults to descending).`,
+  }
+];
+
+
 /**
  * Given a tyranid schema, produce an object path
  * to insert into the Open API spec.
@@ -54,13 +86,14 @@ export function path(
     /**
      * add route parameter
      */
-    baseRouteParameters.push({
+    baseRouteParameters.push(({
       name: parentField.name,
       type: 'string',
       in: 'path',
       required: true,
-      description: 'ID of linked ' + parentDef.name
-    });
+      description: 'ID of linked ' + parentDef.name,
+      ['x-object-id']: true
+    } as any) as Parameter);
 
     parentScopeBase = pluralize(parentDef.name);
 
@@ -95,7 +128,7 @@ export function path(
     `);
   }
 
-  const { name } = schemaDef;
+  const { name, pascalName } = schemaDef;
 
   const out = {
     id: def.id,
@@ -104,6 +137,10 @@ export function path(
   };
 
   const common = {
+    ['x-tyranid-collection-id']: def.id
+  };
+
+  const returns = {
     produces: [
       'application/json'
     ]
@@ -133,16 +170,17 @@ export function path(
   };
 
   const schemaRef = {
-    $ref: `#/definitions/${name}`
+    $ref: `#/definitions/${pascalName}`
   };
 
   const idParameter: Parameter = {
-    name: 'id',
+    name: '_id',
     in: 'path',
     type: 'string',
-    description: `id of the ${name} object`,
+    description: `ID of the ${pascalName} object`,
+    ['x-object-id']: true,
     required: true
-  };
+  } as any;
 
   /**
    *
@@ -161,7 +199,8 @@ export function path(
   if (includeMethod('get')) {
     baseRoutes.path.get = {
       ...common,
-      ...parameters(),
+      ...returns,
+      ...parameters(...BASE_FIND_PARAMETERS),
       ...addScopes('read'),
       summary: `retrieve multiple ${name} objects`,
       responses: {
@@ -175,24 +214,85 @@ export function path(
     };
   }
 
+
+  /**
+   * POST /<collection>/
+   */
+  if (includeMethod('post')) {
+    baseRoutes.path.post = {
+      ...common,
+      ...returns,
+      ...addScopes('write'),
+      ...parameters(),
+      summary: `create a new ${name} object`,
+      responses: {
+        ...denied(),
+        ...invalid(),
+        ...success(`created ${name} object`, schemaRef)
+      }
+    };
+  }
+
+
+  /**
+   * PUT /<collection>/
+   */
+  if (includeMethod('put')) {
+    baseRoutes.path.put = {
+      ...common,
+      ...returns,
+      ...addScopes('write'),
+      ...parameters(),
+      summary: `update multiple ${name} objects`,
+      responses: {
+        ...denied(),
+        ...invalid(),
+        ...success(`updated ${name} objects`, {
+          type: 'array',
+          items: schemaRef
+        })
+      }
+    };
+  }
+
+
+  /**
+   * DELETE /<collection>/
+   */
+  if (includeMethod('delete')) {
+    baseRoutes.path.delete = {
+      ...common,
+      ...addScopes('write'),
+      ...parameters(),
+      summary: `delete multiple ${name} object`,
+      responses: {
+        ...denied(),
+        ...invalid(),
+        ...success(`deletes the ${name} objects`)
+      }
+    };
+  }
+
+
   /**
    *
    * single id routes
    *
    */
   const singleIdRoutes = {
-    route: `/${baseCollectionRoute}/{id}`,
+    route: `/${baseCollectionRoute}/{_id}`,
     path: {} as Path
   };
   out.paths.push(singleIdRoutes);
 
   /**
-   * GET /<collection>/{id}
+   * GET /<collection>/{_id}
    */
   if (includeMethod('get')) {
     singleIdRoutes.path.get = {
       summary: `retrieve an individual ${name} object`,
       ...common,
+      ...returns,
       ...addScopes('read'),
       ...parameters(idParameter),
       responses: {
@@ -203,14 +303,35 @@ export function path(
     };
   }
 
+
   /**
-   * DELETE /<collection>/{id}
+   * PUT /<collection>/{_id}
+   */
+  if (includeMethod('put')) {
+    baseRoutes.path.put = {
+      ...common,
+      ...returns,
+      ...addScopes('write'),
+      ...parameters(idParameter),
+      summary: `update single ${name} object`,
+      responses: {
+        ...denied(),
+        ...invalid(),
+        ...success(`updated ${name} object`, schemaRef)
+      }
+    };
+  }
+
+
+  /**
+   * DELETE /<collection>/{_id}
    */
   if (includeMethod('delete')) {
     singleIdRoutes.path.delete = {
-      summary: `delete an individual ${name} object`,
+      ...common,
       ...addScopes('write'),
       ...parameters(idParameter),
+      summary: `delete an individual ${name} object`,
       responses: {
         ...denied(),
         ...invalid(),

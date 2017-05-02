@@ -3,6 +3,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../utils");
 const security_1 = require("./security");
 /**
+ * query parameters for searching
+ */
+const BASE_FIND_PARAMETERS = [
+    {
+        name: '$limit',
+        in: 'query',
+        type: 'number',
+        description: `Number of results to include in response (defaults to 20).`,
+    },
+    {
+        name: '$skip',
+        in: 'query',
+        type: 'number',
+        description: `Number of results to skip in search (defaults to 0).`,
+    },
+    {
+        name: '$sort',
+        in: 'query',
+        type: 'string',
+        description: `Property to sort by (defaults to _id).`,
+    },
+    {
+        name: '$ascend',
+        in: 'query',
+        type: 'boolean',
+        description: `Ascending sort (defaults to descending).`,
+    }
+];
+/**
  * Given a tyranid schema, produce an object path
  * to insert into the Open API spec.
  *
@@ -48,7 +77,8 @@ function path(def, lookup) {
             type: 'string',
             in: 'path',
             required: true,
-            description: 'ID of linked ' + parentDef.name
+            description: 'ID of linked ' + parentDef.name,
+            ['x-object-id']: true
         });
         parentScopeBase = pluralize(parentDef.name);
         /**
@@ -78,13 +108,16 @@ function path(def, lookup) {
       No schema definition found for collection id = ${def.id}
     `);
     }
-    const { name } = schemaDef;
+    const { name, pascalName } = schemaDef;
     const out = {
         id: def.id,
         base: baseCollectionName,
         paths: []
     };
     const common = {
+        ['x-tyranid-collection-id']: def.id
+    };
+    const returns = {
         produces: [
             'application/json'
         ]
@@ -108,13 +141,14 @@ function path(def, lookup) {
         return security_1.requireScopes(...scopes);
     };
     const schemaRef = {
-        $ref: `#/definitions/${name}`
+        $ref: `#/definitions/${pascalName}`
     };
     const idParameter = {
-        name: 'id',
+        name: '_id',
         in: 'path',
         type: 'string',
-        description: `id of the ${name} object`,
+        description: `ID of the ${pascalName} object`,
+        ['x-object-id']: true,
         required: true
     };
     /**
@@ -131,10 +165,31 @@ function path(def, lookup) {
      * GET /<collection>/
      */
     if (includeMethod('get')) {
-        baseRoutes.path.get = Object.assign({}, common, parameters(), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`array of ${name} objects`, {
+        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...BASE_FIND_PARAMETERS), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`array of ${name} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });
+    }
+    /**
+     * POST /<collection>/
+     */
+    if (includeMethod('post')) {
+        baseRoutes.path.post = Object.assign({}, common, returns, addScopes('write'), parameters(), { summary: `create a new ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`created ${name} object`, schemaRef)) });
+    }
+    /**
+     * PUT /<collection>/
+     */
+    if (includeMethod('put')) {
+        baseRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters(), { summary: `update multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} objects`, {
+                type: 'array',
+                items: schemaRef
+            })) });
+    }
+    /**
+     * DELETE /<collection>/
+     */
+    if (includeMethod('delete')) {
+        baseRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(), { summary: `delete multiple ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} objects`)) });
     }
     /**
      *
@@ -142,21 +197,27 @@ function path(def, lookup) {
      *
      */
     const singleIdRoutes = {
-        route: `/${baseCollectionRoute}/{id}`,
+        route: `/${baseCollectionRoute}/{_id}`,
         path: {}
     };
     out.paths.push(singleIdRoutes);
     /**
-     * GET /<collection>/{id}
+     * GET /<collection>/{_id}
      */
     if (includeMethod('get')) {
-        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${name} object` }, common, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), success(`sends the ${name} object`, schemaRef)) });
+        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${name} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), success(`sends the ${name} object`, schemaRef)) });
     }
     /**
-     * DELETE /<collection>/{id}
+     * PUT /<collection>/{_id}
+     */
+    if (includeMethod('put')) {
+        baseRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters(idParameter), { summary: `update single ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} object`, schemaRef)) });
+    }
+    /**
+     * DELETE /<collection>/{_id}
      */
     if (includeMethod('delete')) {
-        singleIdRoutes.path.delete = Object.assign({ summary: `delete an individual ${name} object` }, addScopes('write'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} object`)) });
+        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} object`)) });
     }
     /**
      * remove any path entries that don't have any methods

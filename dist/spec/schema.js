@@ -19,6 +19,16 @@ function schema(def) {
     const opts = utils_1.options(def);
     const name = opts.name || def.name;
     const pascalName = utils_1.pascal(name);
+    /**
+     * add direct check for organizationId for now,
+     * should have hook functions later
+     */
+    if (!('organizationId' in def.fields)) {
+        return utils_1.error(`
+      organizationId property must exist on collection
+      to expose to public api, it does not exist on collection ${def.name}
+    `);
+    }
     const out = {
         name,
         pascalName,

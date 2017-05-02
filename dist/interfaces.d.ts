@@ -89,6 +89,14 @@ export interface Options {
      */
     host?: string;
     /**
+     * base path
+     */
+    basePath?: string;
+    /**
+     * schemes
+     */
+    schemes?: string[];
+    /**
      * contact information for api
      */
     contact?: {
