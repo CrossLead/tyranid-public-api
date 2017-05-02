@@ -36,7 +36,7 @@ function schema(def) {
         schema: {
             ['x-tyranid-collection-id']: def.id,
             type: 'object',
-            properties: schemaObject(def.fields)
+            properties: schemaObject(def.fields, def.name)
         }
     };
     return out;
@@ -62,7 +62,9 @@ function extendPath(next, path) {
 function schemaObject(fields, path) {
     const properties = {};
     utils_1.each(fields, (field, name) => {
-        properties[name] = schemaType(field, extendPath(name, path));
+        const prop = schemaType(field, extendPath(name, path));
+        if (prop)
+            properties[name] = prop;
     });
     return properties;
 }
@@ -73,6 +75,8 @@ function schemaObject(fields, path) {
  * @param path property path in schema of current field
  */
 function schemaType(field, path) {
+    if (field.name !== '_id' && !include(field, path))
+        return;
     // TODO: should links be refs?
     const type = field.def.link
         ? 'string'
@@ -119,10 +123,13 @@ function schemaType(field, path) {
           but missing an \`of\` property
         `);
             }
-            Object.assign(out, {
-                type: 'array',
-                items: schemaType(element, extendPath(PATH_MARKERS.ARRAY, path))
-            });
+            const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path));
+            if (itemType) {
+                Object.assign(out, {
+                    type: 'array',
+                    items: itemType
+                });
+            }
             break;
         }
         /**
@@ -145,10 +152,12 @@ function schemaType(field, path) {
             property but no values property.
           `);
                 }
+                const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
                 // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
                 // pull in new typings and remove any cast.
                 /* tslint:disable */
-                out.additionalProperties = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
+                if (subType)
+                    out.additionalProperties = subType;
                 /* tslint:enable */
                 break;
             }
@@ -159,7 +168,9 @@ function schemaType(field, path) {
                 return utils_1.error(`field "${path}" is of type \`object\` but
           has no \`fields\` property`);
             }
-            out.properties = schemaObject(subfields, path);
+            const subType = schemaObject(subfields, path);
+            if (subType)
+                out.properties = subType;
             break;
         }
         default: return utils_1.error(`field "${path}" is of unsupported type: ${type}`);
@@ -187,5 +198,21 @@ function schemaType(field, path) {
         out.description = (opts.note || field.def.note || '').replace(/\t+/mg, '');
     }
     return out;
+}
+/**
+ * Include field in schema
+ *
+ * @param field tyranid field instance
+ */
+const pc = {};
+function include(field, path) {
+    const name = field.name;
+    if (path in pc)
+        return pc[path];
+    if ((field.fields && utils_1.each(field.fields, include)) ||
+        (field.of && include(field.of, extendPath(name, path))) ||
+        (field.def.openAPI))
+        return pc[path] = true;
+    pc[path] = false;
 }
 //# sourceMappingURL=schema.js.map

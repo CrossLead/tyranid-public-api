@@ -43,7 +43,7 @@ export function schema(
     schema: {
       ['x-tyranid-collection-id']: def.id,
       type: 'object',
-      properties: schemaObject(def.fields)
+      properties: schemaObject(def.fields, def.name)
     } as {}
   };
 
@@ -78,7 +78,8 @@ function schemaObject(
   const properties: { [key: string]: Schema } = {};
 
   each(fields, (field, name) => {
-    properties[name] = schemaType(field, extendPath(name, path));
+    const prop = schemaType(field, extendPath(name, path));
+    if (prop) properties[name] = prop;
   });
 
   return properties;
@@ -94,6 +95,8 @@ function schemaType(
   field: Tyr.FieldInstance,
   path: string
 ) {
+  if (field.name !== '_id' && !include(field, path)) return;
+
   // TODO: should links be refs?
   const type = field.def.link
     ? 'string'
@@ -147,10 +150,14 @@ function schemaType(
         `);
       }
 
-      Object.assign(out, {
-        type: 'array',
-        items: schemaType(element, extendPath(PATH_MARKERS.ARRAY, path))
-      });
+      const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path));
+
+      if (itemType) {
+        Object.assign(out, {
+          type: 'array',
+          items: itemType
+        });
+      }
       break;
     }
 
@@ -177,13 +184,15 @@ function schemaType(
           `);
         }
 
-        // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
-        // pull in new typings and remove any cast.
-        /* tslint:disable */
-        (<any> out).additionalProperties = schemaType(
+        const subType = schemaType(
           values,
           extendPath(PATH_MARKERS.HASH, path)
         );
+
+        // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
+        // pull in new typings and remove any cast.
+        /* tslint:disable */
+        if (subType) (<any> out).additionalProperties = subType;
         /* tslint:enable */
 
         break;
@@ -199,7 +208,8 @@ function schemaType(
         );
       }
 
-      out.properties = schemaObject(subfields, path);
+      const subType = schemaObject(subfields, path);
+      if (subType) out.properties = subType;
 
       break;
     }
@@ -237,4 +247,24 @@ function schemaType(
   }
 
   return out;
+}
+
+const __include__cache = {} as { [key: string]: boolean };
+/**
+ * Include field in schema
+ *
+ * @param field tyranid field instance
+ */
+function include(field: Tyr.FieldInstance, path: string) {
+  const name = field.name;
+
+  if (path in __include__cache) return __include__cache[path];
+
+  if (
+    (field.fields && each(field.fields, include)) ||
+    (field.of && include(field.of, extendPath(name, path))) ||
+    (field.def.openAPI)
+  ) return __include__cache[path] = true;
+
+  __include__cache[path] = false;
 }
