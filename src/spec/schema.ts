@@ -249,7 +249,7 @@ function schemaType(
   return out;
 }
 
-const __include__cache = {} as { [key: string]: boolean };
+const INCLUDE_CACHE = {} as { [key: string]: boolean };
 /**
  * Include field in schema
  *
@@ -258,13 +258,13 @@ const __include__cache = {} as { [key: string]: boolean };
 function include(field: Tyr.FieldInstance, path: string) {
   const name = field.name;
 
-  if (path in __include__cache) return __include__cache[path];
+  if (path in INCLUDE_CACHE) return INCLUDE_CACHE[path];
 
   if (
     (field.fields && each(field.fields, include)) ||
     (field.of && include(field.of, extendPath(name, path))) ||
     (field.def.openAPI)
-  ) return __include__cache[path] = true;
+  ) return INCLUDE_CACHE[path] = true;
 
-  __include__cache[path] = false;
+  INCLUDE_CACHE[path] = false;
 }

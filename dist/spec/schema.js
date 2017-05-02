@@ -199,20 +199,20 @@ function schemaType(field, path) {
     }
     return out;
 }
+const INCLUDE_CACHE = {};
 /**
  * Include field in schema
  *
  * @param field tyranid field instance
  */
-const pc = {};
 function include(field, path) {
     const name = field.name;
-    if (path in pc)
-        return pc[path];
+    if (path in INCLUDE_CACHE)
+        return INCLUDE_CACHE[path];
     if ((field.fields && utils_1.each(field.fields, include)) ||
         (field.of && include(field.of, extendPath(name, path))) ||
         (field.def.openAPI))
-        return pc[path] = true;
-    pc[path] = false;
+        return INCLUDE_CACHE[path] = true;
+    INCLUDE_CACHE[path] = false;
 }
 //# sourceMappingURL=schema.js.map
