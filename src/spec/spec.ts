@@ -31,7 +31,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     description = "Public API generated from tyranid-open-api-spec",
     title = "Public API",
     host = "http://localhost:9000",
-    basePath = '/v1',
+    basePath = '/',
     schemes = [
       'https'
     ]

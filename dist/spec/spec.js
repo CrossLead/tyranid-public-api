@@ -5,7 +5,7 @@ const path_1 = require("./path");
 const schema_1 = require("./schema");
 const security_1 = require("./security");
 function spec(Tyr, opts = {}) {
-    const { version = "1.0.0", description = "Public API generated from tyranid-open-api-spec", title = "Public API", host = "http://localhost:9000", basePath = '/v1', schemes = [
+    const { version = "1.0.0", description = "Public API generated from tyranid-open-api-spec", title = "Public API", host = "http://localhost:9000", basePath = '/', schemes = [
         'https'
     ] } = opts;
     const oauth2Scopes = {};
