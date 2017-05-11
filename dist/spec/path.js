@@ -237,7 +237,7 @@ exports.path = path;
 function tooMany() {
     return {
         429: {
-            description: 'Too many requests.'
+            description: 'too many requests'
         }
     };
 }
