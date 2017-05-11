@@ -29,7 +29,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     version = "1.0.0",
     description = "Public API generated from tyranid-open-api-spec",
     title = "Public API",
-    host = "http://localhost:9000",
+    host = "localhost:9000",
     basePath = '/',
     schemes = [
       'https'
@@ -47,6 +47,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     },
     basePath,
     schemes,
+    host,
     paths: {} as { [key: string]: Path },
     definitions: {} as { [key: string]: ExtendedSchema }
   };
