@@ -1,5 +1,11 @@
 import { Parameter, Path, Schema } from 'swagger-schema-official';
 
+export interface ExtendedSchema extends Schema {
+  ['x-tyranid-openapi-collection-id']?: string;
+  ['x-tyranid-openapi-name-path']?: string;
+  ['x-tyranid-openapi-object-id']?: boolean;
+}
+
 export interface SchemaOptions {
   /**
    * description to use instead of the main field note
@@ -56,7 +62,7 @@ export interface SchemaContainer {
   name: string;
   pascalName: string;
   id: string;
-  schema: Schema;
+  schema: ExtendedSchema;
 }
 
 /**

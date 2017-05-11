@@ -34,7 +34,7 @@ function schema(def) {
         pascalName,
         id: def.id,
         schema: {
-            ['x-tyranid-collection-id']: def.id,
+            ['x-tyranid-openapi-collection-id']: def.id,
             type: 'object',
             properties: schemaObject(def.fields, def.name)
         }
@@ -82,7 +82,9 @@ function schemaType(field, path) {
         ? 'string'
         : field.def.is;
     const opts = utils_1.options(field.def);
-    const out = {};
+    const out = {
+        ['x-tyranid-openapi-name-path']: field.namePath.name
+    };
     switch (type) {
         /**
          * string aliases

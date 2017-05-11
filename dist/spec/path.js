@@ -10,25 +10,29 @@ const BASE_FIND_PARAMETERS = [
         name: '$limit',
         in: 'query',
         type: 'number',
-        description: `Number of results to include in response (defaults to 20).`,
+        description: `Number of results to include in response`,
+        default: 10
     },
     {
         name: '$skip',
         in: 'query',
         type: 'number',
-        description: `Number of results to skip in search (defaults to 0).`,
+        description: `Number of results to skip in search`,
+        default: 0
     },
     {
         name: '$sort',
         in: 'query',
         type: 'string',
-        description: `Property to sort by (defaults to _id).`,
+        description: `Property to sort on`,
+        default: '_id'
     },
     {
         name: '$ascend',
         in: 'query',
         type: 'boolean',
-        description: `Ascending sort (defaults to descending).`,
+        description: `Ascending sort`,
+        default: false
     }
 ];
 /**
@@ -78,7 +82,7 @@ function path(def, lookup) {
             in: 'path',
             required: true,
             description: 'ID of linked ' + parentDef.name,
-            ['x-object-id']: true
+            ['x-tyranid-openapi-object-id']: true
         });
         parentScopeBase = pluralize(parentDef.name);
         /**
@@ -108,14 +112,16 @@ function path(def, lookup) {
       No schema definition found for collection id = ${def.id}
     `);
     }
-    const { name, pascalName } = schemaDef;
+    const { name, pascalName, schema } = schemaDef;
+    const putPostSchema = JSON.parse(JSON.stringify(schemaDef.schema));
+    delete putPostSchema.properties._id;
     const out = {
         id: def.id,
         base: baseCollectionName,
         paths: []
     };
     const common = {
-        ['x-tyranid-collection-id']: def.id
+        ['x-tyranid-openapi-collection-id']: def.id
     };
     const returns = {
         produces: [
@@ -150,7 +156,7 @@ function path(def, lookup) {
         description: `ID of the ${pascalName} object`,
         required: true
     };
-    idParameter['x-object-id'] = true;
+    idParameter['x-tyranid-openapi-object-id'] = true;
     /**
      *
      * base routes
@@ -174,13 +180,28 @@ function path(def, lookup) {
      * POST /<collection>/
      */
     if (includeMethod('post')) {
-        baseRoutes.path.post = Object.assign({}, common, returns, addScopes('write'), parameters(), { summary: `create a new ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`created ${name} object`, schemaRef)) });
+        baseRoutes.path.post = Object.assign({}, common, returns, addScopes('write'), parameters({
+            name: 'data',
+            in: 'body',
+            description: `New ${pascalName} object`,
+            required: true,
+            schema: putPostSchema
+        }), { summary: `create a new ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`created ${name} object`, schemaRef)) });
     }
     /**
      * PUT /<collection>/
      */
     if (includeMethod('put')) {
-        baseRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters(), { summary: `update multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} objects`, {
+        baseRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters({
+            name: 'data',
+            in: 'body',
+            description: `Modified ${pascalName} objects`,
+            required: true,
+            schema: {
+                type: 'array',
+                items: schemaDef.schema
+            }
+        }), { summary: `update multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });
@@ -189,7 +210,17 @@ function path(def, lookup) {
      * DELETE /<collection>/
      */
     if (includeMethod('delete')) {
-        baseRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(), { summary: `delete multiple ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} objects`)) });
+        baseRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters({
+            name: '_id',
+            in: 'query',
+            type: 'array',
+            items: {
+                type: 'string',
+                ['x-tyranid-openapi-object-id']: true
+            },
+            description: `IDs of the ${pascalName} objects to delete`,
+            required: true
+        }), { summary: `delete multiple ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} objects`)) });
     }
     /**
      *
@@ -211,7 +242,13 @@ function path(def, lookup) {
      * PUT /<collection>/{_id}
      */
     if (includeMethod('put')) {
-        baseRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters(idParameter), { summary: `update single ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} object`, schemaRef)) });
+        singleIdRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters(idParameter, {
+            name: 'data',
+            in: 'body',
+            description: `Modified ${pascalName} object`,
+            required: true,
+            schema: putPostSchema
+        }), { summary: `update single ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} object`, schemaRef)) });
     }
     /**
      * DELETE /<collection>/{_id}

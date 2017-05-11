@@ -1,6 +1,5 @@
-import { Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { SchemaContainer, SchemaOptions } from '../interfaces';
+import { ExtendedSchema, SchemaContainer, SchemaOptions } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
 
 /**
@@ -41,7 +40,7 @@ export function schema(
     pascalName,
     id: def.id,
     schema: {
-      ['x-tyranid-collection-id']: def.id,
+      ['x-tyranid-openapi-collection-id']: def.id,
       type: 'object',
       properties: schemaObject(def.fields, def.name)
     } as {}
@@ -75,7 +74,7 @@ function schemaObject(
   fields: { [key: string]: Tyr.FieldInstance },
   path?: string
 ) {
-  const properties: { [key: string]: Schema } = {};
+  const properties: { [key: string]: ExtendedSchema } = {};
 
   each(fields, (field, name) => {
     const prop = schemaType(field, extendPath(name, path));
@@ -103,7 +102,9 @@ function schemaType(
     : field.def.is;
 
   const opts = options(field.def);
-  const out: Schema = {};
+  const out: ExtendedSchema = {
+    ['x-tyranid-openapi-name-path']: field.namePath.name
+  };
 
   switch (type) {
 

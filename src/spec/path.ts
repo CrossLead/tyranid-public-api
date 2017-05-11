@@ -1,6 +1,6 @@
-import { Parameter, Path, Schema } from 'swagger-schema-official';
+import { Parameter, Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { PathContainer, SchemaContainer } from '../interfaces';
+import { ExtendedSchema, PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
 import { createScope, requireScopes } from './security';
 
@@ -12,25 +12,29 @@ const BASE_FIND_PARAMETERS = [
     name: '$limit',
     in: 'query',
     type: 'number',
-    description: `Number of results to include in response (defaults to 20).`,
+    description: `Number of results to include in response`,
+    default: 10
   },
   {
     name: '$skip',
     in: 'query',
     type: 'number',
-    description: `Number of results to skip in search (defaults to 0).`,
+    description: `Number of results to skip in search`,
+    default: 0
   },
   {
     name: '$sort',
     in: 'query',
     type: 'string',
-    description: `Property to sort by (defaults to _id).`,
+    description: `Property to sort on`,
+    default: '_id'
   },
   {
     name: '$ascend',
     in: 'query',
     type: 'boolean',
-    description: `Ascending sort (defaults to descending).`,
+    description: `Ascending sort`,
+    default: false
   }
 ];
 
@@ -90,7 +94,7 @@ export function path(
       in: 'path',
       required: true,
       description: 'ID of linked ' + parentDef.name,
-      ['x-object-id']: true
+      ['x-tyranid-openapi-object-id']: true
     } as {}) as Parameter);
 
     parentScopeBase = pluralize(parentDef.name);
@@ -126,7 +130,10 @@ export function path(
     `);
   }
 
-  const { name, pascalName } = schemaDef;
+  const { name, pascalName, schema } = schemaDef;
+
+  const putPostSchema: ExtendedSchema = JSON.parse(JSON.stringify(schemaDef.schema));
+  delete putPostSchema.properties!._id;
 
   const out = {
     id: def.id,
@@ -135,7 +142,7 @@ export function path(
   };
 
   const common = {
-    ['x-tyranid-collection-id']: def.id
+    ['x-tyranid-openapi-collection-id']: def.id
   };
 
   const returns = {
@@ -179,7 +186,7 @@ export function path(
     required: true
   };
 
-  (idParameter as any)['x-object-id'] = true;
+  (idParameter as any)['x-tyranid-openapi-object-id'] = true;
 
   /**
    *
@@ -221,7 +228,13 @@ export function path(
       ...common,
       ...returns,
       ...addScopes('write'),
-      ...parameters(),
+      ...parameters({
+        name: 'data',
+        in: 'body',
+        description: `New ${pascalName} object`,
+        required: true,
+        schema: putPostSchema
+      }),
       summary: `create a new ${name} object`,
       responses: {
         ...denied(),
@@ -239,7 +252,16 @@ export function path(
       ...common,
       ...returns,
       ...addScopes('write'),
-      ...parameters(),
+      ...parameters({
+        name: 'data',
+        in: 'body',
+        description: `Modified ${pascalName} objects`,
+        required: true,
+        schema: {
+          type: 'array',
+          items: schemaDef.schema
+        }
+      }),
       summary: `update multiple ${name} objects`,
       responses: {
         ...denied(),
@@ -259,7 +281,17 @@ export function path(
     baseRoutes.path.delete = {
       ...common,
       ...addScopes('write'),
-      ...parameters(),
+      ...parameters({
+        name: '_id',
+        in: 'query',
+        type: 'array',
+        items: {
+          type: 'string',
+          ['x-tyranid-openapi-object-id']: true
+        },
+        description: `IDs of the ${pascalName} objects to delete`,
+        required: true
+      }),
       summary: `delete multiple ${name} object`,
       responses: {
         ...denied(),
@@ -302,11 +334,17 @@ export function path(
    * PUT /<collection>/{_id}
    */
   if (includeMethod('put')) {
-    baseRoutes.path.put = {
+    singleIdRoutes.path.put = {
       ...common,
       ...returns,
       ...addScopes('write'),
-      ...parameters(idParameter),
+      ...parameters(idParameter, {
+        name: 'data',
+        in: 'body',
+        description: `Modified ${pascalName} object`,
+        required: true,
+        schema: putPostSchema
+      }),
       summary: `update single ${name} object`,
       responses: {
         ...denied(),
@@ -357,7 +395,7 @@ function denied(description = 'permission denied') {
  */
 function success(
   description: string,
-  schema?: Schema
+  schema?: ExtendedSchema
 ) {
   return {
     200: {

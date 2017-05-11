@@ -1,13 +1,12 @@
 import {
   OAuth2ApplicationSecurity,
   Path,
-  Schema,
   Security,
   Spec
 } from 'swagger-schema-official';
 
 import { Tyr as Tyranid } from 'tyranid';
-import { Options, SchemaContainer } from '../interfaces';
+import { ExtendedSchema, Options, SchemaContainer } from '../interfaces';
 import { error, options, validate, yaml } from '../utils';
 import { path } from './path';
 import { schema } from './schema';
@@ -49,7 +48,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     basePath,
     schemes,
     paths: {} as { [key: string]: Path },
-    definitions: {} as { [key: string]: Schema }
+    definitions: {} as { [key: string]: ExtendedSchema }
   };
 
   const lookup = {} as {[key: string]: SchemaContainer };
