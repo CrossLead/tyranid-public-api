@@ -3,12 +3,13 @@
  */
 export default [
   {
-    name: '$query',
+    name: '$search',
     in: 'query',
     type: 'string',
     description: `
-      Search against a text field, for example "?$query=name:ben"
-      searches the "name" property for the string "ben"
+      Search against a text field, for example "?$search=name:ben"
+      searches the "name" property for the string "ben". Nested properties
+      can be specified using dot syntax (for example: "?$search=info.nested.name:ben")
     `.trim()
   },
   {
