@@ -27,7 +27,7 @@ export default [
     in: 'query',
     type: 'string',
     description: `
-      Restrict maximum date value for a date field, for example "?$minDate=date:1494522427127"
+      Restrict maximum date value for a date field, for example "?$maxDate=date:1494522427127"
       returns matches with the "date" field having values less
       than 1494522427127 (milliseconds since the unix epoch)
     `.trim()
