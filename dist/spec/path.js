@@ -1,40 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../utils");
+const base_find_parameters_1 = require("./base-find-parameters");
 const security_1 = require("./security");
-/**
- * query parameters for searching
- */
-const BASE_FIND_PARAMETERS = [
-    {
-        name: '$limit',
-        in: 'query',
-        type: 'number',
-        description: `Number of results to include in response`,
-        default: 10
-    },
-    {
-        name: '$skip',
-        in: 'query',
-        type: 'number',
-        description: `Number of results to skip in search`,
-        default: 0
-    },
-    {
-        name: '$sort',
-        in: 'query',
-        type: 'string',
-        description: `Property to sort on`,
-        default: '_id'
-    },
-    {
-        name: '$ascend',
-        in: 'query',
-        type: 'boolean',
-        description: `Ascending sort`,
-        default: false
-    }
-];
 /**
  * Given a tyranid schema, produce an object path
  * to insert into the Open API spec.
@@ -171,7 +139,7 @@ function path(def, lookup) {
      * GET /<collection>/
      */
     if (includeMethod('get')) {
-        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...BASE_FIND_PARAMETERS), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`array of ${name} objects`, {
+        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`array of ${name} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });

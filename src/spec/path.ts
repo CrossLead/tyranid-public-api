@@ -2,41 +2,8 @@ import { Parameter, Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { ExtendedSchema, PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal } from '../utils';
+import baseFindParameters from './base-find-parameters';
 import { createScope, requireScopes } from './security';
-
-/**
- * query parameters for searching
- */
-const BASE_FIND_PARAMETERS = [
-  {
-    name: '$limit',
-    in: 'query',
-    type: 'number',
-    description: `Number of results to include in response`,
-    default: 10
-  },
-  {
-    name: '$skip',
-    in: 'query',
-    type: 'number',
-    description: `Number of results to skip in search`,
-    default: 0
-  },
-  {
-    name: '$sort',
-    in: 'query',
-    type: 'string',
-    description: `Property to sort on`,
-    default: '_id'
-  },
-  {
-    name: '$ascend',
-    in: 'query',
-    type: 'boolean',
-    description: `Ascending sort`,
-    default: false
-  }
-];
 
 /**
  * Given a tyranid schema, produce an object path
@@ -206,7 +173,7 @@ export function path(
     baseRoutes.path.get = {
       ...common,
       ...returns,
-      ...parameters(...BASE_FIND_PARAMETERS),
+      ...parameters(...baseFindParameters),
       ...addScopes('read'),
       summary: `retrieve multiple ${name} objects`,
       responses: {
