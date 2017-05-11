@@ -85,8 +85,9 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     }
   });
 
+  const [ scheme ] = schemes;
   Object.assign(specObject, {
-    securityDefinitions: createSecurityDefinitions(host, oauth2Scopes)
+    securityDefinitions: createSecurityDefinitions(scheme + '://' + host, oauth2Scopes)
   });
 
   const result = validate(specObject);

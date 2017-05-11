@@ -47,8 +47,9 @@ function spec(Tyr, opts = {}) {
             Object.assign(oauth2Scopes, security_1.collectionScopes(result.base, lookup[result.id].name));
         }
     });
+    const [scheme] = schemes;
     Object.assign(specObject, {
-        securityDefinitions: security_1.createSecurityDefinitions(host, oauth2Scopes)
+        securityDefinitions: security_1.createSecurityDefinitions(scheme + '://' + host, oauth2Scopes)
     });
     const result = utils_1.validate(specObject);
     /**
