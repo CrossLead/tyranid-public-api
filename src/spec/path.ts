@@ -179,6 +179,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`array of ${name} objects`, {
           type: 'array',
           items: schemaRef
@@ -206,6 +207,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`created ${name} object`, schemaRef)
       }
     };
@@ -233,6 +235,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`updated ${name} objects`, {
           type: 'array',
           items: schemaRef
@@ -263,6 +266,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`deletes the ${name} objects`)
       }
     };
@@ -292,6 +296,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`sends the ${name} object`, schemaRef)
       }
     };
@@ -316,6 +321,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`updated ${name} object`, schemaRef)
       }
     };
@@ -333,6 +339,7 @@ export function path(
       responses: {
         ...denied(),
         ...invalid(),
+        ...tooMany(),
         ...success(`deletes the ${name} object`)
       }
     };
@@ -344,6 +351,17 @@ export function path(
   out.paths = out.paths.filter(p => !!Object.keys(p.path).length);
 
   return out;
+}
+
+/**
+ * rate limiter response
+ */
+function tooMany() {
+  return {
+    429: {
+      description: 'Too many requests.'
+    }
+  };
 }
 
 /**

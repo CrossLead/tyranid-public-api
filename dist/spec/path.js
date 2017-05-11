@@ -139,7 +139,7 @@ function path(def, lookup) {
      * GET /<collection>/
      */
     if (includeMethod('get')) {
-        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`array of ${name} objects`, {
+        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${name} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });
@@ -154,7 +154,7 @@ function path(def, lookup) {
             description: `New ${pascalName} object`,
             required: true,
             schema: putPostSchema
-        }), { summary: `create a new ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`created ${name} object`, schemaRef)) });
+        }), { summary: `create a new ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${name} object`, schemaRef)) });
     }
     /**
      * PUT /<collection>/
@@ -169,7 +169,7 @@ function path(def, lookup) {
                 type: 'array',
                 items: schemaDef.schema
             }
-        }), { summary: `update multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} objects`, {
+        }), { summary: `update multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${name} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });
@@ -188,7 +188,7 @@ function path(def, lookup) {
             },
             description: `IDs of the ${pascalName} objects to delete`,
             required: true
-        }), { summary: `delete multiple ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} objects`)) });
+        }), { summary: `delete multiple ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${name} objects`)) });
     }
     /**
      *
@@ -204,7 +204,7 @@ function path(def, lookup) {
      * GET /<collection>/{_id}
      */
     if (includeMethod('get')) {
-        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${name} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), success(`sends the ${name} object`, schemaRef)) });
+        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${name} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), tooMany(), success(`sends the ${name} object`, schemaRef)) });
     }
     /**
      * PUT /<collection>/{_id}
@@ -216,13 +216,13 @@ function path(def, lookup) {
             description: `Modified ${pascalName} object`,
             required: true,
             schema: putPostSchema
-        }), { summary: `update single ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`updated ${name} object`, schemaRef)) });
+        }), { summary: `update single ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${name} object`, schemaRef)) });
     }
     /**
      * DELETE /<collection>/{_id}
      */
     if (includeMethod('delete')) {
-        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${name} object`, responses: Object.assign({}, denied(), invalid(), success(`deletes the ${name} object`)) });
+        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${name} object`)) });
     }
     /**
      * remove any path entries that don't have any methods
@@ -231,6 +231,16 @@ function path(def, lookup) {
     return out;
 }
 exports.path = path;
+/**
+ * rate limiter response
+ */
+function tooMany() {
+    return {
+        429: {
+            description: 'Too many requests.'
+        }
+    };
+}
 /**
  * create a 403 response
  *
