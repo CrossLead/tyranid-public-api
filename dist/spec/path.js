@@ -16,6 +16,10 @@ function path(def, lookup) {
     const pluralize = (str) => str + 's';
     const baseCollectionName = pluralize(def.name);
     const baseRouteParameters = [];
+    const schemaDef = lookup[def.id];
+    const { pascalName, schema } = schemaDef;
+    const putPostSchema = JSON.parse(JSON.stringify(schemaDef.schema));
+    delete putPostSchema.properties._id;
     let baseCollectionRoute = baseCollectionName;
     let parentScopeBase = '';
     /**
@@ -52,6 +56,10 @@ function path(def, lookup) {
             description: 'ID of linked ' + parentDef.name,
             ['x-tyranid-openapi-object-id']: true
         });
+        /**
+         * remove parent link id from post schema
+         */
+        delete putPostSchema.properties[parentField.name];
         parentScopeBase = pluralize(parentDef.name);
         /**
          * /metrics/{metricId}/metricTargets -> /metrics/{metricId}/targets
@@ -74,15 +82,11 @@ function path(def, lookup) {
             subRouteName
         ].join('/');
     }
-    const schemaDef = lookup[def.id];
     if (!schemaDef) {
         return utils_1.error(`
       No schema definition found for collection id = ${def.id}
     `);
     }
-    const { name, pascalName, schema } = schemaDef;
-    const putPostSchema = JSON.parse(JSON.stringify(schemaDef.schema));
-    delete putPostSchema.properties._id;
     const out = {
         id: def.id,
         base: baseCollectionName,
@@ -139,7 +143,7 @@ function path(def, lookup) {
      * GET /<collection>/
      */
     if (includeMethod('get')) {
-        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${name} objects`, {
+        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${pascalName} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });
@@ -151,10 +155,13 @@ function path(def, lookup) {
         baseRoutes.path.post = Object.assign({}, common, returns, addScopes('write'), parameters({
             name: 'data',
             in: 'body',
-            description: `New ${pascalName} object`,
+            description: `Array of new ${pascalName} objects`,
             required: true,
-            schema: putPostSchema
-        }), { summary: `create a new ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${name} object`, schemaRef)) });
+            schema: {
+                type: 'array',
+                items: putPostSchema
+            }
+        }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${pascalName} objects`, schemaRef)) });
     }
     /**
      * PUT /<collection>/
@@ -169,7 +176,7 @@ function path(def, lookup) {
                 type: 'array',
                 items: schemaDef.schema
             }
-        }), { summary: `update multiple ${name} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${name} objects`, {
+        }), { summary: `update multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} objects`, {
                 type: 'array',
                 items: schemaRef
             })) });
@@ -188,7 +195,7 @@ function path(def, lookup) {
             },
             description: `IDs of the ${pascalName} objects to delete`,
             required: true
-        }), { summary: `delete multiple ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${name} objects`)) });
+        }), { summary: `delete multiple ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${pascalName} objects`)) });
     }
     /**
      *
@@ -204,7 +211,7 @@ function path(def, lookup) {
      * GET /<collection>/{_id}
      */
     if (includeMethod('get')) {
-        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${name} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), tooMany(), success(`sends the ${name} object`, schemaRef)) });
+        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${pascalName} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), tooMany(), success(`sends the ${pascalName} object`, schemaRef)) });
     }
     /**
      * PUT /<collection>/{_id}
@@ -216,13 +223,13 @@ function path(def, lookup) {
             description: `Modified ${pascalName} object`,
             required: true,
             schema: putPostSchema
-        }), { summary: `update single ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${name} object`, schemaRef)) });
+        }), { summary: `update single ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} object`, schemaRef)) });
     }
     /**
      * DELETE /<collection>/{_id}
      */
     if (includeMethod('delete')) {
-        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${name} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${name} object`)) });
+        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${pascalName} object`)) });
     }
     /**
      * remove any path entries that don't have any methods

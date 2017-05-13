@@ -21,6 +21,14 @@ export function path(
   const pluralize = (str: string) => str + 's';
   const baseCollectionName = pluralize(def.name);
   const baseRouteParameters: Parameter[] = [];
+  const schemaDef = lookup[def.id];
+
+
+  const { pascalName, schema } = schemaDef;
+
+  const putPostSchema: ExtendedSchema = JSON.parse(JSON.stringify(schemaDef.schema));
+  delete putPostSchema.properties!._id;
+
 
   let baseCollectionRoute = baseCollectionName;
 
@@ -64,6 +72,11 @@ export function path(
       ['x-tyranid-openapi-object-id']: true
     } as {}) as Parameter);
 
+    /**
+     * remove parent link id from post schema
+     */
+    delete putPostSchema.properties![parentField.name];
+
     parentScopeBase = pluralize(parentDef.name);
 
     /**
@@ -89,18 +102,12 @@ export function path(
     ].join('/');
   }
 
-  const schemaDef = lookup[def.id];
 
   if (!schemaDef) {
     return error(`
       No schema definition found for collection id = ${def.id}
     `);
   }
-
-  const { name, pascalName, schema } = schemaDef;
-
-  const putPostSchema: ExtendedSchema = JSON.parse(JSON.stringify(schemaDef.schema));
-  delete putPostSchema.properties!._id;
 
   const out = {
     id: def.id,
@@ -175,12 +182,12 @@ export function path(
       ...returns,
       ...parameters(...baseFindParameters),
       ...addScopes('read'),
-      summary: `retrieve multiple ${name} objects`,
+      summary: `retrieve multiple ${pascalName} objects`,
       responses: {
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`array of ${name} objects`, {
+        ...success(`array of ${pascalName} objects`, {
           type: 'array',
           items: schemaRef
         })
@@ -199,16 +206,19 @@ export function path(
       ...parameters({
         name: 'data',
         in: 'body',
-        description: `New ${pascalName} object`,
+        description: `Array of new ${pascalName} objects`,
         required: true,
-        schema: putPostSchema
+        schema: {
+          type: 'array',
+          items: putPostSchema
+        }
       }),
-      summary: `create a new ${name} object`,
+      summary: `create new ${pascalName} objects`,
       responses: {
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`created ${name} object`, schemaRef)
+        ...success(`created ${pascalName} objects`, schemaRef)
       }
     };
   }
@@ -231,12 +241,12 @@ export function path(
           items: schemaDef.schema
         }
       }),
-      summary: `update multiple ${name} objects`,
+      summary: `update multiple ${pascalName} objects`,
       responses: {
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`updated ${name} objects`, {
+        ...success(`updated ${pascalName} objects`, {
           type: 'array',
           items: schemaRef
         })
@@ -262,12 +272,12 @@ export function path(
         description: `IDs of the ${pascalName} objects to delete`,
         required: true
       }),
-      summary: `delete multiple ${name} object`,
+      summary: `delete multiple ${pascalName} object`,
       responses: {
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`deletes the ${name} objects`)
+        ...success(`deletes the ${pascalName} objects`)
       }
     };
   }
@@ -288,7 +298,7 @@ export function path(
    */
   if (includeMethod('get')) {
     singleIdRoutes.path.get = {
-      summary: `retrieve an individual ${name} object`,
+      summary: `retrieve an individual ${pascalName} object`,
       ...common,
       ...returns,
       ...addScopes('read'),
@@ -297,7 +307,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`sends the ${name} object`, schemaRef)
+        ...success(`sends the ${pascalName} object`, schemaRef)
       }
     };
   }
@@ -317,12 +327,12 @@ export function path(
         required: true,
         schema: putPostSchema
       }),
-      summary: `update single ${name} object`,
+      summary: `update single ${pascalName} object`,
       responses: {
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`updated ${name} object`, schemaRef)
+        ...success(`updated ${pascalName} object`, schemaRef)
       }
     };
   }
@@ -335,12 +345,12 @@ export function path(
       ...common,
       ...addScopes('write'),
       ...parameters(idParameter),
-      summary: `delete an individual ${name} object`,
+      summary: `delete an individual ${pascalName} object`,
       responses: {
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`deletes the ${name} object`)
+        ...success(`deletes the ${pascalName} object`)
       }
     };
   }
