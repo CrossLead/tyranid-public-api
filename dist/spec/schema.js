@@ -155,12 +155,8 @@ function schemaType(field, path) {
           `);
                 }
                 const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
-                // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
-                // pull in new typings and remove any cast.
-                /* tslint:disable */
                 if (subType)
                     out.additionalProperties = subType;
-                /* tslint:enable */
                 break;
             }
             /**

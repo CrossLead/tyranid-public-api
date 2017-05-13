@@ -190,11 +190,7 @@ function schemaType(
           extendPath(PATH_MARKERS.HASH, path)
         );
 
-        // TODO: once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/15866 is merged,
-        // pull in new typings and remove any cast.
-        /* tslint:disable */
-        if (subType) (<any> out).additionalProperties = subType;
-        /* tslint:enable */
+        if (subType) out.additionalProperties = subType;
 
         break;
       }

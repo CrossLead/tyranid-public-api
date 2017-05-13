@@ -21,7 +21,7 @@
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "@types/swagger-schema-official": "^2.0.2",
+    "@types/swagger-schema-official": "^2.0.4",
     "ajv": "^5.0.1",
     "js-yaml": "^3.8.3",
     "swagger-schema-official": "^2.0.0-bab6bed"
