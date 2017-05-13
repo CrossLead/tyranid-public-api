@@ -23,12 +23,10 @@ export function path(
   const baseRouteParameters: Parameter[] = [];
   const schemaDef = lookup[def.id];
 
-
   const { pascalName, schema } = schemaDef;
 
   const putPostSchema: ExtendedSchema = JSON.parse(JSON.stringify(schemaDef.schema));
   delete putPostSchema.properties!._id;
-
 
   let baseCollectionRoute = baseCollectionName;
 
@@ -101,7 +99,6 @@ export function path(
       subRouteName
     ].join('/');
   }
-
 
   if (!schemaDef) {
     return error(`
