@@ -5,6 +5,8 @@ import { each, error, options, pascal } from '../utils';
 import baseFindParameters from './base-find-parameters';
 import { createScope, requireScopes } from './security';
 
+const MAX_ARRAY_ITEMS = 200;
+
 /**
  * Given a tyranid schema, produce an object path
  * to insert into the Open API spec.
@@ -186,6 +188,7 @@ export function path(
         ...tooMany(),
         ...success(`array of ${pascalName} objects`, {
           type: 'array',
+          maxItems: MAX_ARRAY_ITEMS,
           items: schemaRef
         })
       }
@@ -207,6 +210,7 @@ export function path(
         required: true,
         schema: {
           type: 'array',
+          maxItems: MAX_ARRAY_ITEMS,
           items: putPostSchema
         }
       }),
@@ -215,7 +219,11 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
-        ...success(`created ${pascalName} objects`, schemaRef)
+        ...success(`created ${pascalName} objects`, {
+          type: 'array',
+          maxItems: MAX_ARRAY_ITEMS,
+          items: schemaRef
+        })
       }
     };
   }
@@ -235,6 +243,7 @@ export function path(
         required: true,
         schema: {
           type: 'array',
+          maxItems: MAX_ARRAY_ITEMS,
           items: schemaDef.schema
         }
       }),
@@ -245,6 +254,7 @@ export function path(
         ...tooMany(),
         ...success(`updated ${pascalName} objects`, {
           type: 'array',
+          maxItems: MAX_ARRAY_ITEMS,
           items: schemaRef
         })
       }
@@ -262,6 +272,7 @@ export function path(
         name: '_id',
         in: 'query',
         type: 'array',
+        maxItems: MAX_ARRAY_ITEMS,
         items: {
           type: 'string',
           ['x-tyranid-openapi-object-id']: true
@@ -366,7 +377,14 @@ export function path(
 function tooMany() {
   return {
     429: {
-      description: 'too many requests'
+      description: 'too many requests',
+      schema: {
+        type: 'object',
+        properties: {
+          status: { type: 'number'},
+          message: { type: 'string' }
+        }
+      }
     }
   };
 }
@@ -377,7 +395,18 @@ function tooMany() {
  * @param description message for denial
  */
 function denied(description = 'permission denied') {
-  return { 403: { description } };
+  return {
+    403: {
+      description,
+      schema: {
+        type: 'object',
+        properties: {
+          status: { type: 'number'},
+          message: { type: 'string' }
+        }
+      }
+    }
+  };
 }
 
 /**
@@ -392,7 +421,14 @@ function success(
   return {
     200: {
       description,
-      ...(schema ? { schema } : {})
+      schema: {
+        type: 'object',
+        properties: {
+          status: { type: 'number'},
+          message: { type: 'string' },
+          ...(schema ? { data: schema } : {})
+        }
+      }
     }
   };
 }
@@ -405,7 +441,14 @@ function success(
 function invalid(description = 'invalid request') {
   return {
     400: {
-      description
+      description,
+      schema: {
+        type: 'object',
+        properties: {
+          status: { type: 'number'},
+          message: { type: 'string' }
+        }
+      }
     }
   };
 }

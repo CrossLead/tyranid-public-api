@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../utils");
 const base_find_parameters_1 = require("./base-find-parameters");
 const security_1 = require("./security");
+const MAX_ARRAY_ITEMS = 200;
 /**
  * Given a tyranid schema, produce an object path
  * to insert into the Open API spec.
@@ -145,6 +146,7 @@ function path(def, lookup) {
     if (includeMethod('get')) {
         baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${pascalName} objects`, {
                 type: 'array',
+                maxItems: MAX_ARRAY_ITEMS,
                 items: schemaRef
             })) });
     }
@@ -159,9 +161,14 @@ function path(def, lookup) {
             required: true,
             schema: {
                 type: 'array',
+                maxItems: MAX_ARRAY_ITEMS,
                 items: putPostSchema
             }
-        }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${pascalName} objects`, schemaRef)) });
+        }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${pascalName} objects`, {
+                type: 'array',
+                maxItems: MAX_ARRAY_ITEMS,
+                items: schemaRef
+            })) });
     }
     /**
      * PUT /<collection>/
@@ -174,10 +181,12 @@ function path(def, lookup) {
             required: true,
             schema: {
                 type: 'array',
+                maxItems: MAX_ARRAY_ITEMS,
                 items: schemaDef.schema
             }
         }), { summary: `update multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} objects`, {
                 type: 'array',
+                maxItems: MAX_ARRAY_ITEMS,
                 items: schemaRef
             })) });
     }
@@ -189,6 +198,7 @@ function path(def, lookup) {
             name: '_id',
             in: 'query',
             type: 'array',
+            maxItems: MAX_ARRAY_ITEMS,
             items: {
                 type: 'string',
                 ['x-tyranid-openapi-object-id']: true
@@ -244,7 +254,14 @@ exports.path = path;
 function tooMany() {
     return {
         429: {
-            description: 'too many requests'
+            description: 'too many requests',
+            schema: {
+                type: 'object',
+                properties: {
+                    status: { type: 'number' },
+                    message: { type: 'string' }
+                }
+            }
         }
     };
 }
@@ -254,7 +271,18 @@ function tooMany() {
  * @param description message for denial
  */
 function denied(description = 'permission denied') {
-    return { 403: { description } };
+    return {
+        403: {
+            description,
+            schema: {
+                type: 'object',
+                properties: {
+                    status: { type: 'number' },
+                    message: { type: 'string' }
+                }
+            }
+        }
+    };
 }
 /**
  * create a 200 response
@@ -263,7 +291,13 @@ function denied(description = 'permission denied') {
  */
 function success(description, schema) {
     return {
-        200: Object.assign({ description }, (schema ? { schema } : {}))
+        200: {
+            description,
+            schema: {
+                type: 'object',
+                properties: Object.assign({ status: { type: 'number' }, message: { type: 'string' } }, (schema ? { data: schema } : {}))
+            }
+        }
     };
 }
 /**
@@ -274,7 +308,14 @@ function success(description, schema) {
 function invalid(description = 'invalid request') {
     return {
         400: {
-            description
+            description,
+            schema: {
+                type: 'object',
+                properties: {
+                    status: { type: 'number' },
+                    message: { type: 'string' }
+                }
+            }
         }
     };
 }
