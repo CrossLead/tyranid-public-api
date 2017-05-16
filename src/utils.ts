@@ -104,3 +104,17 @@ export function validate(spec: Spec) {
     errors:  (ajv.errors || []).slice()
   };
 }
+
+/**
+ * return subset object of obj
+ *
+ * @param obj javascript object
+ * @param keys array of keys of obj
+ */
+export function pick<T, K extends keyof T>(obj: T, keys: K[]) {
+  const out = {} as Pick<T, K>;
+  for (const key of keys) {
+    out[key] = obj[key];
+  }
+  return out;
+}

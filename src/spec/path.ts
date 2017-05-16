@@ -1,8 +1,8 @@
 import { Parameter, Path } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { ExtendedSchema, PathContainer, SchemaContainer } from '../interfaces';
-import { each, error, options, pascal } from '../utils';
-import baseFindParameters from './base-find-parameters';
+import { each, error, options, pascal, pick } from '../utils';
+import * as baseParameters from './base-find-parameters';
 import { createScope, requireScopes } from './security';
 
 const MAX_ARRAY_ITEMS = 200;
@@ -179,7 +179,7 @@ export function path(
     baseRoutes.path.get = {
       ...common,
       ...returns,
-      ...parameters(...baseFindParameters),
+      ...parameters(...baseParameters.DEFAULT_PARAMETERS),
       ...addScopes('read'),
       summary: `retrieve multiple ${pascalName} objects`,
       responses: {
@@ -190,6 +190,16 @@ export function path(
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
           items: schemaRef
+        }, {
+          paging: {
+            type: 'object',
+            description: 'Parameter settings for next page of results',
+            properties: {
+              $limit: pick(baseParameters.LIMIT, ['type', 'description', 'default']),
+              $skip: pick(baseParameters.SKIP, ['type', 'description', 'default']),
+              $sort: pick(baseParameters.SORT, ['type', 'description', 'default'])
+            }
+          }
         })
       }
     };
@@ -416,7 +426,8 @@ function denied(description = 'permission denied') {
  */
 function success(
   description: string,
-  schema?: ExtendedSchema
+  schema?: ExtendedSchema,
+  meta: { [key: string]: ExtendedSchema } = {}
 ) {
   return {
     200: {
@@ -426,7 +437,8 @@ function success(
         properties: {
           status: { type: 'number'},
           message: { type: 'string' },
-          ...(schema ? { data: schema } : {})
+          ...(schema ? { data: schema } : {}),
+          ...meta
         }
       }
     }

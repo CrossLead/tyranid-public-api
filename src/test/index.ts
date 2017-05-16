@@ -5,6 +5,7 @@ import { Tyr } from 'tyranid';
 import {
   pascal,
   path,
+  pick,
   schema,
   spec,
   validate,
@@ -39,4 +40,9 @@ test('should generate spec that passes validation', async (t) => {
   require('fs').writeFileSync('./.tmp/test-spec.yaml', yaml(s))
   /* tslint:enable */
   t.pass();
+});
+
+test('pick should pick', t => {
+  const obj = { a: 1, b: 2, c: 3 };
+  t.deepEqual({ a: 1, b: 2 }, pick(obj, ['a', 'b']));
 });

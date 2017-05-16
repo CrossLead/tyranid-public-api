@@ -45,3 +45,10 @@ export declare function validate(spec: Spec): {
     valid: boolean | AJV.Thenable<any>;
     errors: AJV.ErrorObject[];
 };
+/**
+ * return subset object of obj
+ *
+ * @param obj javascript object
+ * @param keys array of keys of obj
+ */
+export declare function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>;

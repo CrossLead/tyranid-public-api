@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../utils");
-const base_find_parameters_1 = require("./base-find-parameters");
+const baseParameters = require("./base-find-parameters");
 const security_1 = require("./security");
 const MAX_ARRAY_ITEMS = 200;
 /**
@@ -144,10 +144,20 @@ function path(def, lookup) {
      * GET /<collection>/
      */
     if (includeMethod('get')) {
-        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...base_find_parameters_1.default), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${pascalName} objects`, {
+        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...baseParameters.DEFAULT_PARAMETERS), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
                 items: schemaRef
+            }, {
+                paging: {
+                    type: 'object',
+                    description: 'Parameter settings for next page of results',
+                    properties: {
+                        $limit: utils_1.pick(baseParameters.LIMIT, ['type', 'description', 'default']),
+                        $skip: utils_1.pick(baseParameters.SKIP, ['type', 'description', 'default']),
+                        $sort: utils_1.pick(baseParameters.SORT, ['type', 'description', 'default'])
+                    }
+                }
             })) });
     }
     /**
@@ -289,13 +299,13 @@ function denied(description = 'permission denied') {
  * @param description success message
  * @param schema [optional] schema of response body
  */
-function success(description, schema) {
+function success(description, schema, meta = {}) {
     return {
         200: {
             description,
             schema: {
                 type: 'object',
-                properties: Object.assign({ status: { type: 'number' }, message: { type: 'string' } }, (schema ? { data: schema } : {}))
+                properties: Object.assign({ status: { type: 'number' }, message: { type: 'string' } }, (schema ? { data: schema } : {}), meta)
             }
         }
     };

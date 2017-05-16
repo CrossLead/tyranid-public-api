@@ -79,4 +79,18 @@ function validate(spec) {
     };
 }
 exports.validate = validate;
+/**
+ * return subset object of obj
+ *
+ * @param obj javascript object
+ * @param keys array of keys of obj
+ */
+function pick(obj, keys) {
+    const out = {};
+    for (const key of keys) {
+        out[key] = obj[key];
+    }
+    return out;
+}
+exports.pick = pick;
 //# sourceMappingURL=utils.js.map

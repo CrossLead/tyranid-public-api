@@ -38,4 +38,8 @@ ava_1.default('should generate spec that passes validation', (t) => __awaiter(th
     /* tslint:enable */
     t.pass();
 }));
+ava_1.default('pick should pick', t => {
+    const obj = { a: 1, b: 2, c: 3 };
+    t.deepEqual({ a: 1, b: 2 }, _1.pick(obj, ['a', 'b']));
+});
 //# sourceMappingURL=index.js.map
