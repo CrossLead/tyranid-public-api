@@ -62,9 +62,11 @@ function extendPath(next, path) {
 function schemaObject(fields, path) {
     const properties = {};
     utils_1.each(fields, (field, name) => {
+        const fieldOpts = utils_1.options(field.def);
         const prop = schemaType(field, extendPath(name, path));
+        const publicName = fieldOpts.name || name;
         if (prop)
-            properties[name] = prop;
+            properties[publicName] = prop;
     });
     return properties;
 }
@@ -74,8 +76,8 @@ function schemaObject(fields, path) {
  * @param field tyranid schema field
  * @param path property path in schema of current field
  */
-function schemaType(field, path) {
-    if (field.name !== '_id' && !include(field, path))
+function schemaType(field, path, includeOverride) {
+    if (field.name !== '_id' && !include(field, path) && !includeOverride)
         return;
     // TODO: should links be refs?
     const type = field.def.link
@@ -125,7 +127,7 @@ function schemaType(field, path) {
           but missing an \`of\` property
         `);
             }
-            const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path));
+            const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path), true);
             if (itemType) {
                 Object.assign(out, {
                     type: 'array',

@@ -77,8 +77,10 @@ function schemaObject(
   const properties: { [key: string]: ExtendedSchema } = {};
 
   each(fields, (field, name) => {
+    const fieldOpts = options(field.def);
     const prop = schemaType(field, extendPath(name, path));
-    if (prop) properties[name] = prop;
+    const publicName = fieldOpts.name || name;
+    if (prop) properties[publicName] = prop;
   });
 
   return properties;
@@ -92,9 +94,10 @@ function schemaObject(
  */
 function schemaType(
   field: Tyr.FieldInstance,
-  path: string
+  path: string,
+  includeOverride?: boolean
 ) {
-  if (field.name !== '_id' && !include(field, path)) return;
+  if (field.name !== '_id' && !include(field, path) && !includeOverride) return;
 
   // TODO: should links be refs?
   const type = field.def.link
@@ -151,7 +154,11 @@ function schemaType(
         `);
       }
 
-      const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path));
+      const itemType = schemaType(
+        element,
+        extendPath(PATH_MARKERS.ARRAY, path),
+        true
+      );
 
       if (itemType) {
         Object.assign(out, {
