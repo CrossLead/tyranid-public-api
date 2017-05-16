@@ -152,11 +152,15 @@ function path(def, lookup) {
                 paging: {
                     type: 'object',
                     description: 'Parameter settings for next page of results',
-                    properties: {
-                        $limit: utils_1.pick(baseParameters.LIMIT, ['type', 'description', 'default']),
-                        $skip: utils_1.pick(baseParameters.SKIP, ['type', 'description', 'default']),
-                        $sort: utils_1.pick(baseParameters.SORT, ['type', 'description', 'default'])
-                    }
+                    properties: (() => {
+                        const props = {
+                            $limit: utils_1.pick(baseParameters.LIMIT, ['type', 'description', 'default']),
+                            $skip: utils_1.pick(baseParameters.SKIP, ['type', 'description', 'default']),
+                            $sort: utils_1.pick(baseParameters.SORT, ['type', 'description', 'default'])
+                        };
+                        props.$skip.default = props.$limit.default;
+                        return props;
+                    })()
                 }
             })) });
     }
@@ -305,7 +309,7 @@ function success(description, schema, meta = {}) {
             description,
             schema: {
                 type: 'object',
-                properties: Object.assign({ status: { type: 'number' }, message: { type: 'string' } }, (schema ? { data: schema } : {}), meta)
+                properties: Object.assign({ status: { type: 'number' }, message: { type: 'string' } }, meta, (schema ? { data: schema } : {}))
             }
         }
     };

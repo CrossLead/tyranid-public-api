@@ -194,11 +194,16 @@ export function path(
           paging: {
             type: 'object',
             description: 'Parameter settings for next page of results',
-            properties: {
-              $limit: pick(baseParameters.LIMIT, ['type', 'description', 'default']),
-              $skip: pick(baseParameters.SKIP, ['type', 'description', 'default']),
-              $sort: pick(baseParameters.SORT, ['type', 'description', 'default'])
-            }
+            properties: (() => {
+              const props = {
+                $limit: pick(baseParameters.LIMIT, ['type', 'description', 'default']),
+                $skip: pick(baseParameters.SKIP, ['type', 'description', 'default']),
+                $sort: pick(baseParameters.SORT, ['type', 'description', 'default'])
+              };
+
+              props.$skip.default = props.$limit.default;
+              return props;
+            })()
           }
         })
       }
@@ -437,8 +442,8 @@ function success(
         properties: {
           status: { type: 'number'},
           message: { type: 'string' },
+          ...meta,
           ...(schema ? { data: schema } : {}),
-          ...meta
         }
       }
     }
