@@ -20,10 +20,10 @@ export function path(
   const opts = options(def);
   const methods = new Set(opts.methods || [ 'all' ]);
   const includeMethod = (route: string) => methods.has(route) || methods.has('all');
-  const pluralize = (str: string) => str + 's';
-  const baseCollectionName = pluralize(def.name);
-  const baseRouteParameters: Parameter[] = [];
+  const pluralize = (str: string) => str.endsWith('s') ? str : str + 's';
   const schemaDef = lookup[def.id];
+  const baseCollectionName = pluralize(schemaDef.name);
+  const baseRouteParameters: Parameter[] = [];
 
   const { pascalName, schema } = schemaDef;
 

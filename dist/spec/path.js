@@ -14,10 +14,10 @@ function path(def, lookup) {
     const opts = utils_1.options(def);
     const methods = new Set(opts.methods || ['all']);
     const includeMethod = (route) => methods.has(route) || methods.has('all');
-    const pluralize = (str) => str + 's';
-    const baseCollectionName = pluralize(def.name);
-    const baseRouteParameters = [];
+    const pluralize = (str) => str.endsWith('s') ? str : str + 's';
     const schemaDef = lookup[def.id];
+    const baseCollectionName = pluralize(schemaDef.name);
+    const baseRouteParameters = [];
     const { pascalName, schema } = schemaDef;
     const putPostSchema = JSON.parse(JSON.stringify(schemaDef.schema));
     delete putPostSchema.properties._id;
