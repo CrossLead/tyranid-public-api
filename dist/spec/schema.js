@@ -77,7 +77,8 @@ function schemaObject(fields, path) {
  * @param path property path in schema of current field
  */
 function schemaType(field, path, includeOverride) {
-    if (field.name !== '_id' && !include(field, path) && !includeOverride)
+    const isIDField = field.name === '_id';
+    if (!isIDField && !include(field, path) && !includeOverride)
         return;
     // TODO: should links be refs?
     const type = field.def.link
@@ -190,6 +191,9 @@ function schemaType(field, path, includeOverride) {
             out.format = 'i32';
             break;
         }
+    }
+    if (isIDField || opts.include === 'read') {
+        out.readOnly = true;
     }
     /**
      * add note from schema

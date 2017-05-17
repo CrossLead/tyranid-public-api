@@ -97,7 +97,8 @@ function schemaType(
   path: string,
   includeOverride?: boolean
 ) {
-  if (field.name !== '_id' && !include(field, path) && !includeOverride) return;
+  const isIDField = field.name === '_id';
+  if (!isIDField && !include(field, path) && !includeOverride) return;
 
   // TODO: should links be refs?
   const type = field.def.link
@@ -239,6 +240,10 @@ function schemaType(
       break;
     }
 
+  }
+
+  if (isIDField || opts.include === 'read') {
+    out.readOnly = true;
   }
 
   /**

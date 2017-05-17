@@ -20,7 +20,7 @@ function path(def, lookup) {
     const baseRouteParameters = [];
     const { pascalName, schema } = schemaDef;
     const putPostSchema = JSON.parse(JSON.stringify(schemaDef.schema));
-    delete putPostSchema.properties._id;
+    putPostSchema.properties = filterNotReadOnly(putPostSchema.properties || {});
     let baseCollectionRoute = baseCollectionName;
     let parentScopeBase = '';
     /**
@@ -332,5 +332,20 @@ function invalid(description = 'invalid request') {
             }
         }
     };
+}
+/**
+ * Return properties filtered by not readonly
+ *
+ * @param schemaHash properties field of a schema
+ */
+function filterNotReadOnly(schemaHash) {
+    const keys = Object.keys(schemaHash);
+    const out = {};
+    for (const key of keys) {
+        if (!schemaHash[key].readOnly) {
+            out[key] = schemaHash[key];
+        }
+    }
+    return out;
 }
 //# sourceMappingURL=path.js.map

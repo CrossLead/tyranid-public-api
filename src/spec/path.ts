@@ -28,7 +28,7 @@ export function path(
   const { pascalName, schema } = schemaDef;
 
   const putPostSchema: ExtendedSchema = JSON.parse(JSON.stringify(schemaDef.schema));
-  delete putPostSchema.properties!._id;
+  putPostSchema.properties = filterNotReadOnly(putPostSchema.properties || {});
 
   let baseCollectionRoute = baseCollectionName;
 
@@ -468,4 +468,23 @@ function invalid(description = 'invalid request') {
       }
     }
   };
+}
+
+/**
+ * Return properties filtered by not readonly
+ *
+ * @param schemaHash properties field of a schema
+ */
+function filterNotReadOnly(schemaHash: {
+  [key: string]: ExtendedSchema
+}) {
+  const keys = Object.keys(schemaHash);
+  const out: { [key: string]: ExtendedSchema } = {};
+  for (const key of keys) {
+    if (!schemaHash[key].readOnly) {
+      out[key] = schemaHash[key];
+    }
+  }
+
+  return out;
 }
