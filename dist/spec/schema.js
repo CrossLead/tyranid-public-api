@@ -29,6 +29,7 @@ function schema(def) {
       to expose to public api, it does not exist on collection ${def.name}
     `);
     }
+    const required = getRequiredChildProps(def);
     const out = {
         name,
         pascalName,
@@ -39,6 +40,9 @@ function schema(def) {
             properties: schemaObject(def.fields, def.name)
         }
     };
+    if (required.length) {
+        out.schema.required = required;
+    }
     return out;
 }
 exports.schema = schema;
@@ -160,6 +164,11 @@ function schemaType(field, path, includeOverride) {
                 const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
                 if (subType)
                     out.additionalProperties = subType;
+                if (field.fields) {
+                    const required = getRequiredChildProps(field);
+                    if (required.length)
+                        out.required = required;
+                }
                 break;
             }
             /**
@@ -218,5 +227,22 @@ function include(field, path) {
         (field.def.openAPI))
         return INCLUDE_CACHE[path] = true;
     INCLUDE_CACHE[path] = false;
+}
+/**
+ * Get a list of child props marked required
+ *
+ * @param field root tyranid def or object field
+ */
+function getRequiredChildProps(field) {
+    const props = [];
+    if (!field.fields)
+        return props;
+    utils_1.each(field.fields, (f, name) => {
+        const opts = utils_1.options(f.def);
+        const propName = opts.name || name;
+        if (f.def.required)
+            props.push(propName);
+    });
+    return props;
 }
 //# sourceMappingURL=schema.js.map

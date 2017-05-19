@@ -1,4 +1,4 @@
-import { Parameter, Path } from 'swagger-schema-official';
+import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { ExtendedSchema, PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal, pick } from '../utils';
@@ -26,9 +26,16 @@ export function path(
   const baseRouteParameters: Parameter[] = [];
 
   const { pascalName, schema } = schemaDef;
+  const cloneSchema = () => JSON.parse(JSON.stringify(schemaDef.schema)) as ExtendedSchema;
 
-  const putPostSchema: ExtendedSchema = JSON.parse(JSON.stringify(schemaDef.schema));
-  putPostSchema.properties = filterNotReadOnly(putPostSchema.properties || {});
+  const putSchema = cloneSchema();
+  const postSchema = cloneSchema();
+
+  putSchema.properties = makeOptional(filterNotReadOnly(putSchema.properties || {}));
+  putSchema.properties!._id = schemaDef.schema.properties!._id;
+  putSchema.required = [ '_id' ];
+
+  postSchema.properties = filterNotReadOnly(postSchema.properties || {});
 
   let baseCollectionRoute = baseCollectionName;
 
@@ -75,7 +82,8 @@ export function path(
     /**
      * remove parent link id from post schema
      */
-    delete putPostSchema.properties![parentField.name];
+    delete putSchema.properties![parentField.name];
+    delete postSchema.properties![parentField.name];
 
     parentScopeBase = pluralize(parentDef.name);
 
@@ -226,7 +234,7 @@ export function path(
         schema: {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: putPostSchema
+          items: postSchema
         }
       }),
       summary: `create new ${pascalName} objects`,
@@ -259,7 +267,7 @@ export function path(
         schema: {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: schemaDef.schema
+          items: putSchema
         }
       }),
       summary: `update multiple ${pascalName} objects`,
@@ -348,7 +356,7 @@ export function path(
         in: 'body',
         description: `Modified ${pascalName} object`,
         required: true,
-        schema: putPostSchema
+        schema: putSchema
       }),
       summary: `update single ${pascalName} object`,
       responses: {
@@ -476,13 +484,51 @@ function invalid(description = 'invalid request') {
  * @param schemaHash properties field of a schema
  */
 function filterNotReadOnly(schemaHash: {
-  [key: string]: ExtendedSchema
+  [key: string]: Schema
 }) {
   const keys = Object.keys(schemaHash);
-  const out: { [key: string]: ExtendedSchema } = {};
+  const out: { [key: string]: Schema } = {};
+
   for (const key of keys) {
     if (!schemaHash[key].readOnly) {
-      out[key] = schemaHash[key];
+      out[key] = { ...schemaHash[key] };
+      const props = schemaHash[key].properties;
+      const items = schemaHash[key].items;
+      if (props) {
+        out[key].properties = filterNotReadOnly(props);
+      }
+      if (items) {
+        const { filteredItems } = filterNotReadOnly({ filteredItems: items });
+        out[key].items = filteredItems;
+      }
+    }
+  }
+
+  return out;
+}
+
+/**
+ * Make all properties in schema optional
+ *
+ * @param schemaHash properties field of a schema
+ */
+function makeOptional(schemaHash: {
+  [key: string]: Schema
+}) {
+  const keys = Object.keys(schemaHash);
+  const out: { [key: string]: Schema } = {};
+
+  for (const key of keys) {
+    out[key] = { ...schemaHash[key] };
+    delete out[key].required;
+    const props = schemaHash[key].properties;
+    const items = schemaHash[key].items;
+    if (props) {
+      out[key].properties = makeOptional(props);
+    }
+    if (items) {
+      const { filteredItems } = makeOptional({ filteredItems: items });
+      out[key].items = filteredItems;
     }
   }
 

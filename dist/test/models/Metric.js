@@ -9,7 +9,7 @@ exports.default = new tyranid_1.Tyr.Collection({
     fields: {
         _id: { is: 'mongoid' },
         organizationId: { is: 'mongoid' },
-        name: { is: 'string', openAPI: true }
+        name: { is: 'string', openAPI: true, required: true }
     },
 });
 //# sourceMappingURL=Metric.js.map

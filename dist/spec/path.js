@@ -19,8 +19,13 @@ function path(def, lookup) {
     const baseCollectionName = pluralize(schemaDef.name);
     const baseRouteParameters = [];
     const { pascalName, schema } = schemaDef;
-    const putPostSchema = JSON.parse(JSON.stringify(schemaDef.schema));
-    putPostSchema.properties = filterNotReadOnly(putPostSchema.properties || {});
+    const cloneSchema = () => JSON.parse(JSON.stringify(schemaDef.schema));
+    const putSchema = cloneSchema();
+    const postSchema = cloneSchema();
+    putSchema.properties = makeOptional(filterNotReadOnly(putSchema.properties || {}));
+    putSchema.properties._id = schemaDef.schema.properties._id;
+    putSchema.required = ['_id'];
+    postSchema.properties = filterNotReadOnly(postSchema.properties || {});
     let baseCollectionRoute = baseCollectionName;
     let parentScopeBase = '';
     /**
@@ -60,7 +65,8 @@ function path(def, lookup) {
         /**
          * remove parent link id from post schema
          */
-        delete putPostSchema.properties[parentField.name];
+        delete putSchema.properties[parentField.name];
+        delete postSchema.properties[parentField.name];
         parentScopeBase = pluralize(parentDef.name);
         /**
          * /metrics/{metricId}/metricTargets -> /metrics/{metricId}/targets
@@ -176,7 +182,7 @@ function path(def, lookup) {
             schema: {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: putPostSchema
+                items: postSchema
             }
         }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${pascalName} objects`, {
                 type: 'array',
@@ -196,7 +202,7 @@ function path(def, lookup) {
             schema: {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: schemaDef.schema
+                items: putSchema
             }
         }), { summary: `update multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} objects`, {
                 type: 'array',
@@ -246,7 +252,7 @@ function path(def, lookup) {
             in: 'body',
             description: `Modified ${pascalName} object`,
             required: true,
-            schema: putPostSchema
+            schema: putSchema
         }), { summary: `update single ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} object`, schemaRef)) });
     }
     /**
@@ -343,7 +349,39 @@ function filterNotReadOnly(schemaHash) {
     const out = {};
     for (const key of keys) {
         if (!schemaHash[key].readOnly) {
-            out[key] = schemaHash[key];
+            out[key] = Object.assign({}, schemaHash[key]);
+            const props = schemaHash[key].properties;
+            const items = schemaHash[key].items;
+            if (props) {
+                out[key].properties = filterNotReadOnly(props);
+            }
+            if (items) {
+                const { filteredItems } = filterNotReadOnly({ filteredItems: items });
+                out[key].items = filteredItems;
+            }
+        }
+    }
+    return out;
+}
+/**
+ * Make all properties in schema optional
+ *
+ * @param schemaHash properties field of a schema
+ */
+function makeOptional(schemaHash) {
+    const keys = Object.keys(schemaHash);
+    const out = {};
+    for (const key of keys) {
+        out[key] = Object.assign({}, schemaHash[key]);
+        delete out[key].required;
+        const props = schemaHash[key].properties;
+        const items = schemaHash[key].items;
+        if (props) {
+            out[key].properties = makeOptional(props);
+        }
+        if (items) {
+            const { filteredItems } = makeOptional({ filteredItems: items });
+            out[key].items = filteredItems;
         }
     }
     return out;

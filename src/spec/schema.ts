@@ -35,6 +35,8 @@ export function schema(
     `);
   }
 
+  const required = getRequiredChildProps(def);
+
   const out: SchemaContainer = {
     name,
     pascalName,
@@ -45,6 +47,10 @@ export function schema(
       properties: schemaObject(def.fields, def.name)
     } as {}
   };
+
+  if (required.length) {
+    out.schema.required = required;
+  }
 
   return out;
 }
@@ -199,7 +205,10 @@ function schemaType(
         );
 
         if (subType) out.additionalProperties = subType;
-
+        if (field.fields) {
+          const required = getRequiredChildProps(field);
+          if (required.length) out.required = required;
+        }
         break;
       }
 
@@ -276,4 +285,23 @@ function include(field: Tyr.FieldInstance, path: string) {
   ) return INCLUDE_CACHE[path] = true;
 
   INCLUDE_CACHE[path] = false;
+}
+
+/**
+ * Get a list of child props marked required
+ *
+ * @param field root tyranid def or object field
+ */
+function getRequiredChildProps(field: Tyr.FieldInstance | Tyr.CollectionDefinitionHydrated) {
+  const props: string[] = [];
+
+  if (!field.fields) return props;
+
+  each(field.fields, (f, name) => {
+    const opts = options(f.def);
+    const propName = opts.name || name;
+    if (f.def.required) props.push(propName);
+  });
+
+  return props;
 }
