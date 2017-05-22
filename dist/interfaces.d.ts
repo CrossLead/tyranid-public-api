@@ -1,8 +1,10 @@
 import { Path, Schema } from 'swagger-schema-official';
+export declare type Method = 'get' | 'post' | 'put' | 'delete';
 export interface ExtendedSchema extends Schema {
     ['x-tyranid-openapi-collection-id']?: string;
     ['x-tyranid-openapi-name-path']?: string;
     ['x-tyranid-openapi-object-id']?: boolean;
+    ['x-tyranid-openapi-methods']?: Method[];
 }
 export interface SchemaOptions {
     /**
@@ -18,13 +20,13 @@ export interface FieldSchemaOptions extends SchemaOptions {
     /**
      * property should be returned / accepted by api
      */
-    include?: ('read' | 'write') | ('get' | 'post' | 'put' | 'delete')[];
+    include?: ('read' | 'write') | Method[];
 }
 export interface CollectionSchemaOptions extends SchemaOptions {
     /**
      * methods to generate for this collection
      */
-    methods?: ('get' | 'post' | 'put' | 'delete')[];
+    methods?: Method[];
     /**
      * whether this collection should be a
      * child route of another (linked) collection

@@ -266,6 +266,10 @@ function schemaType(
 
   }
 
+  if (Array.isArray(opts.include)) {
+    out['x-tyranid-openapi-methods'] = opts.include;
+  }
+
   if (isIDField || readOnly) {
     out.readOnly = true;
   }

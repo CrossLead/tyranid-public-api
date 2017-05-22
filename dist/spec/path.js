@@ -150,10 +150,13 @@ function path(def, lookup) {
      * GET /<collection>/
      */
     if (includeMethod('get')) {
+        const filteredSchema = filterSchemaForMethod('get', schemaDef.schema);
+        if (!filteredSchema)
+            throw new Error(`No schema for get after filtering`);
         baseRoutes.path.get = Object.assign({}, common, returns, parameters(...baseParameters.DEFAULT_PARAMETERS), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: schemaRef
+                items: filteredSchema
             }, {
                 paging: {
                     type: 'object',
@@ -174,6 +177,12 @@ function path(def, lookup) {
      * POST /<collection>/
      */
     if (includeMethod('post')) {
+        const filteredBodySchema = filterSchemaForMethod('post', postSchema);
+        if (!filteredBodySchema)
+            throw new Error(`No schema for post after filtering`);
+        const filteredResponseSchema = filterSchemaForMethod('post', schemaDef.schema);
+        if (!filteredResponseSchema)
+            throw new Error(`No schema for post after filtering`);
         baseRoutes.path.post = Object.assign({}, common, returns, addScopes('write'), parameters({
             name: 'data',
             in: 'body',
@@ -182,18 +191,24 @@ function path(def, lookup) {
             schema: {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: postSchema
+                items: filteredBodySchema
             }
         }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: schemaRef
+                items: filteredResponseSchema
             })) });
     }
     /**
      * PUT /<collection>/
      */
     if (includeMethod('put')) {
+        const filteredBodySchema = filterSchemaForMethod('put', putSchema);
+        if (!filteredBodySchema)
+            throw new Error(`No schema for put after filtering`);
+        const filteredResponseSchema = filterSchemaForMethod('put', schemaDef.schema);
+        if (!filteredResponseSchema)
+            throw new Error(`No schema for put after filtering`);
         baseRoutes.path.put = Object.assign({}, common, returns, addScopes('write'), parameters({
             name: 'data',
             in: 'body',
@@ -202,12 +217,12 @@ function path(def, lookup) {
             schema: {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: putSchema
+                items: filteredBodySchema
             }
         }), { summary: `update multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
-                items: schemaRef
+                items: filteredResponseSchema
             })) });
     }
     /**
@@ -385,5 +400,49 @@ function makeOptional(schemaHash) {
         }
     }
     return out;
+}
+/**
+ * Filter schema to include properties for specific methods, if listed
+ *
+ * @param method HTTP verb
+ * @param schema schema with possible method metadata
+ */
+function filterSchemaForMethod(method, schema) {
+    if (!includePropertyForMethod(method, schema))
+        return;
+    switch (schema.type) {
+        case 'array': {
+            const filtered = filterSchemaForMethod(method, schema.items);
+            if (filtered) {
+                const updated = Object.assign({}, schema, { items: filtered });
+                return updated;
+            }
+            return;
+        }
+        case 'object': {
+            const out = Object.assign({}, schema, { properties: {} });
+            utils_1.each(schema.properties, (prop, name) => {
+                const result = filterSchemaForMethod(method, prop);
+                if (result) {
+                    out.properties[name] = result;
+                }
+            });
+            if (Array.isArray(out.required)) {
+                out.required = out.required.filter(p => p in out.properties);
+            }
+            return out;
+        }
+        default: return schema;
+    }
+}
+/**
+ * Check if a swagger schema has method metadata
+ *
+ * @param method HTTP verb
+ * @param schema extended schema to check for methods metadata
+ */
+function includePropertyForMethod(method, schema) {
+    const methods = schema['x-tyranid-openapi-methods'];
+    return !methods || (methods.indexOf(method) !== -1);
 }
 //# sourceMappingURL=path.js.map

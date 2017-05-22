@@ -1,6 +1,6 @@
 import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { ExtendedSchema, PathContainer, SchemaContainer } from '../interfaces';
+import { ExtendedSchema, Method, PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal, pick } from '../utils';
 import * as baseParameters from './base-find-parameters';
 import { createScope, requireScopes } from './security';
@@ -184,6 +184,9 @@ export function path(
    * GET /<collection>/
    */
   if (includeMethod('get')) {
+    const filteredSchema = filterSchemaForMethod('get', schemaDef.schema);
+    if (!filteredSchema) throw new Error(`No schema for get after filtering`);
+
     baseRoutes.path.get = {
       ...common,
       ...returns,
@@ -197,7 +200,7 @@ export function path(
         ...success(`array of ${pascalName} objects`, {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: schemaRef
+          items: filteredSchema
         }, {
           paging: {
             type: 'object',
@@ -222,6 +225,12 @@ export function path(
    * POST /<collection>/
    */
   if (includeMethod('post')) {
+    const filteredBodySchema = filterSchemaForMethod('post', postSchema);
+    if (!filteredBodySchema) throw new Error(`No schema for post after filtering`);
+
+    const filteredResponseSchema = filterSchemaForMethod('post', schemaDef.schema);
+    if (!filteredResponseSchema) throw new Error(`No schema for post after filtering`);
+
     baseRoutes.path.post = {
       ...common,
       ...returns,
@@ -234,7 +243,7 @@ export function path(
         schema: {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: postSchema
+          items: filteredBodySchema
         }
       }),
       summary: `create new ${pascalName} objects`,
@@ -245,7 +254,7 @@ export function path(
         ...success(`created ${pascalName} objects`, {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: schemaRef
+          items: filteredResponseSchema
         })
       }
     };
@@ -255,6 +264,12 @@ export function path(
    * PUT /<collection>/
    */
   if (includeMethod('put')) {
+    const filteredBodySchema = filterSchemaForMethod('put', putSchema);
+    if (!filteredBodySchema) throw new Error(`No schema for put after filtering`);
+
+    const filteredResponseSchema = filterSchemaForMethod('put', schemaDef.schema);
+    if (!filteredResponseSchema) throw new Error(`No schema for put after filtering`);
+
     baseRoutes.path.put = {
       ...common,
       ...returns,
@@ -267,7 +282,7 @@ export function path(
         schema: {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: putSchema
+          items: filteredBodySchema
         }
       }),
       summary: `update multiple ${pascalName} objects`,
@@ -278,7 +293,7 @@ export function path(
         ...success(`updated ${pascalName} objects`, {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
-          items: schemaRef
+          items: filteredResponseSchema
         })
       }
     };
@@ -533,4 +548,55 @@ function makeOptional(schemaHash: {
   }
 
   return out;
+}
+
+/**
+ * Filter schema to include properties for specific methods, if listed
+ *
+ * @param method HTTP verb
+ * @param schema schema with possible method metadata
+ */
+function filterSchemaForMethod(method: Method, schema: ExtendedSchema): ExtendedSchema | void {
+  if (!includePropertyForMethod(method, schema)) return;
+
+  switch (schema.type) {
+    case 'array': {
+      const filtered = filterSchemaForMethod(method, schema.items!);
+      if (filtered) {
+        const updated = {
+          ...schema,
+          items: filtered
+        } as ExtendedSchema;
+        return updated;
+      }
+      return;
+    }
+
+    case 'object': {
+      const out: ExtendedSchema = { ...schema, properties: {} };
+      each(schema.properties as { [key: string]: ExtendedSchema }, (prop, name) => {
+        const result = filterSchemaForMethod(method, prop);
+        if (result) {
+          out.properties![name] = result;
+        }
+      });
+      if (Array.isArray(out.required)) {
+        out.required = out.required.filter(p => p in out.properties!);
+      }
+      return out;
+    }
+
+    default: return schema;
+  }
+}
+
+/**
+ * Check if a swagger schema has method metadata
+ *
+ * @param method HTTP verb
+ * @param schema extended schema to check for methods metadata
+ */
+function includePropertyForMethod(method: Method, schema: ExtendedSchema) {
+  const methods: Method[] | void = schema['x-tyranid-openapi-methods'];
+  return !methods || (methods.indexOf(method) !== -1);
 }
