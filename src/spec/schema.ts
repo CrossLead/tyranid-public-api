@@ -297,7 +297,6 @@ function schemaType(
     });
   }
 
-
   return out;
 }
 

@@ -211,17 +211,6 @@ function schemaType(field, path, includeOverride) {
             break;
         }
     }
-    /**
-     * if property is link to enum collection,
-     * add the enum values to schema
-     */
-    if (linkCollection && linkCollection.def.enum) {
-        out.enum = linkCollection.def.values.map((v) => {
-            if (!v.name)
-                throw new Error(`No name property for enum link ${linkCollection.def.name}`);
-            return v.name.toUpperCase();
-        });
-    }
     if (Array.isArray(opts.include)) {
         out['x-tyranid-openapi-methods'] = opts.include;
     }
@@ -233,6 +222,18 @@ function schemaType(field, path, includeOverride) {
      */
     if (opts.note || field.def.note) {
         out.description = (opts.note || field.def.note || '').replace(/\t+/mg, '');
+    }
+    /**
+     * if property is link to enum collection,
+     * add the enum values to schema
+     */
+    if (linkCollection && linkCollection.def.enum) {
+        const description = [];
+        out.enum = linkCollection.def.values.map((v) => {
+            if (!v.name)
+                throw new Error(`No name property for enum link ${linkCollection.def.name}`);
+            return v.name.toUpperCase();
+        });
     }
     return out;
 }
