@@ -55,6 +55,13 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   const lookup = {} as {[key: string]: SchemaContainer };
   const collections = Tyr.collections.filter(c => c.def.openAPI);
 
+  collections.sort((a, b) => {
+    const A = options(a.def).name || a.def.name;
+    const B = options(b.def).name || b.def.name;
+
+    return Number(A > B) - Number(A < B);
+  });
+
   /**
    * create Open API object schemas for relevant collections / properties
    */

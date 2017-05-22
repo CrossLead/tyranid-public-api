@@ -22,7 +22,7 @@ export interface FieldSchemaOptions extends SchemaOptions {
   /**
    * property should be returned / accepted by api
    */
-  include?: 'read' | 'write';
+  include?: ('read' | 'write') | ('get' | 'post' | 'put' | 'delete')[];
 }
 
 export interface CollectionSchemaOptions extends SchemaOptions {

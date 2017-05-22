@@ -89,6 +89,14 @@ function schemaType(field, path, includeOverride) {
         ? 'string'
         : field.def.is;
     const opts = utils_1.options(field.def);
+    const methods = new Set(Array.isArray(opts.include)
+        ? opts.include
+        : (opts.include === 'read'
+            ? ['get']
+            : ['get', 'put', 'post', 'delete']));
+    const readOnly = (!methods.has('put') &&
+        !methods.has('post') &&
+        !methods.has('delete'));
     const out = {
         ['x-tyranid-openapi-name-path']: field.namePath.name
     };
@@ -201,7 +209,7 @@ function schemaType(field, path, includeOverride) {
             break;
         }
     }
-    if (isIDField || opts.include === 'read') {
+    if (isIDField || readOnly) {
         out.readOnly = true;
     }
     /**

@@ -112,6 +112,21 @@ function schemaType(
     : field.def.is;
 
   const opts = options(field.def);
+
+  const methods = new Set(Array.isArray(opts.include)
+    ? opts.include
+    : (
+      opts.include === 'read'
+        ? ['get']
+        : ['get', 'put', 'post', 'delete']
+    ));
+
+  const readOnly = (
+    !methods.has('put') &&
+    !methods.has('post') &&
+    !methods.has('delete')
+  );
+
   const out: ExtendedSchema = {
     ['x-tyranid-openapi-name-path']: field.namePath.name
   };
@@ -251,7 +266,7 @@ function schemaType(
 
   }
 
-  if (isIDField || opts.include === 'read') {
+  if (isIDField || readOnly) {
     out.readOnly = true;
   }
 
