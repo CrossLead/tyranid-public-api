@@ -52,3 +52,8 @@ export declare function validate(spec: Spec): {
  * @param keys array of keys of obj
  */
 export declare function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>;
+/**
+ * "My String" -> "MY_STRING"
+ * @param str string
+ */
+export declare function upperSnake(str: string): string;

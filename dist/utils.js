@@ -93,4 +93,12 @@ function pick(obj, keys) {
     return out;
 }
 exports.pick = pick;
+/**
+ * "My String" -> "MY_STRING"
+ * @param str string
+ */
+function upperSnake(str) {
+    return str.split(/\s+/).join('_').toUpperCase();
+}
+exports.upperSnake = upperSnake;
 //# sourceMappingURL=utils.js.map

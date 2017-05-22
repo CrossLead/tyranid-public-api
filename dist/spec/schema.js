@@ -232,7 +232,7 @@ function schemaType(field, path, includeOverride) {
         out.enum = linkCollection.def.values.map((v) => {
             if (!v.name)
                 throw new Error(`No name property for enum link ${linkCollection.def.name}`);
-            return v.name.toUpperCase();
+            return utils_1.upperSnake(v.name);
         });
     }
     return out;

@@ -1,6 +1,6 @@
 import { Tyr } from 'tyranid';
 import { ExtendedSchema, SchemaContainer, SchemaOptions } from '../interfaces';
-import { each, error, options, pascal } from '../utils';
+import { each, error, options, pascal, upperSnake } from '../utils';
 
 /**
  * strings for elements in property path
@@ -293,7 +293,7 @@ function schemaType(
     const description = [];
     out.enum = (linkCollection as any).def.values.map((v: { name?: string }) => {
       if (!v.name) throw new Error(`No name property for enum link ${linkCollection.def.name}`);
-      return v.name.toUpperCase();
+      return upperSnake(v.name);
     });
   }
 

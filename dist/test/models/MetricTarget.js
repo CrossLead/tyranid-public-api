@@ -12,7 +12,8 @@ const TargetType = new tyranid_1.Tyr.Collection({
     values: [
         ['_id', 'name'],
         [1, 'Value'],
-        [2, 'Metric']
+        [2, 'Metric'],
+        [3, 'Value With Spaces']
     ]
 });
 exports.default = new tyranid_1.Tyr.Collection({
