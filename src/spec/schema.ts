@@ -106,8 +106,10 @@ function schemaType(
   const isIDField = field.name === '_id';
   if (!isIDField && !include(field, path) && !includeOverride) return;
 
+  const linkCollection = field.def.link && Tyr.byName[field.def.link];
+
   // TODO: should links be refs?
-  const type = field.def.link
+  const type = linkCollection
     ? 'string'
     : field.def.is;
 
@@ -282,6 +284,19 @@ function schemaType(
       opts.note || field.def.note || ''
     ).replace(/\t+/mg, '');
   }
+
+  /**
+   * if property is link to enum collection,
+   * add the enum values to schema
+   */
+  if (linkCollection && linkCollection.def.enum) {
+    const description = [];
+    out.enum = (linkCollection as any).def.values.map((v: { name?: string }) => {
+      if (!v.name) throw new Error(`No name property for enum link ${linkCollection.def.name}`);
+      return v.name.toUpperCase();
+    });
+  }
+
 
   return out;
 }

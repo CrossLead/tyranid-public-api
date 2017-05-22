@@ -3375,9 +3375,9 @@ typescript@2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.3.1.tgz#e3361fb395c6c3f9c69faeeabc9503f8bdecaea1"
 
-tyranid@0.1.45:
-  version "0.1.45"
-  resolved "https://registry.yarnpkg.com/tyranid/-/tyranid-0.1.45.tgz#1dcd780556fc60c9f925bd3be0be6d0f457d7156"
+tyranid@^0.1.57:
+  version "0.1.57"
+  resolved "https://registry.yarnpkg.com/tyranid/-/tyranid-0.1.57.tgz#6ae5ac3269a00d46f8a0bd00cd8a0bc07b85c754"
   dependencies:
     "@types/express" "4.0.34"
     "@types/mongodb" "2.1.36"

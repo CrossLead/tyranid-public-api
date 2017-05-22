@@ -1,5 +1,21 @@
 import { Tyr } from 'tyranid';
 
+const TargetType = new Tyr.Collection({
+  id: 'mtt',
+  name: 'metricTargetType',
+  enum: true,
+  fields: {
+    _id:  { is: 'integer' },
+    name: { is: 'string', labelField: true }
+  },
+  values: [
+    [ '_id', 'name' ],
+
+    [ 1, 'Value' ],
+    [ 2, 'Metric' ]
+  ]
+});
+
 export default new Tyr.Collection({
   id: 'mtg',
   name: 'metricTarget',
@@ -14,6 +30,9 @@ export default new Tyr.Collection({
     date: { is: 'date', openAPI: true },
     value: { is: 'double', openAPI: true },
     organizationId: { is: 'mongoid' },
-    excludeProperty: { is: 'string' }
+    excludeProperty: { is: 'string' },
+    type: {
+      link: 'metricTargetType', openAPI: true
+    }
   },
 });

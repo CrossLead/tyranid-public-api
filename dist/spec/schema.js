@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tyranid_1 = require("tyranid");
 const utils_1 = require("../utils");
 /**
  * strings for elements in property path
@@ -84,8 +85,9 @@ function schemaType(field, path, includeOverride) {
     const isIDField = field.name === '_id';
     if (!isIDField && !include(field, path) && !includeOverride)
         return;
+    const linkCollection = field.def.link && tyranid_1.Tyr.byName[field.def.link];
     // TODO: should links be refs?
-    const type = field.def.link
+    const type = linkCollection
         ? 'string'
         : field.def.is;
     const opts = utils_1.options(field.def);
@@ -208,6 +210,17 @@ function schemaType(field, path, includeOverride) {
             out.format = 'i32';
             break;
         }
+    }
+    /**
+     * if property is link to enum collection,
+     * add the enum values to schema
+     */
+    if (linkCollection && linkCollection.def.enum) {
+        out.enum = linkCollection.def.values.map((v) => {
+            if (!v.name)
+                throw new Error(`No name property for enum link ${linkCollection.def.name}`);
+            return v.name.toUpperCase();
+        });
     }
     if (Array.isArray(opts.include)) {
         out['x-tyranid-openapi-methods'] = opts.include;
