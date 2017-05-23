@@ -293,7 +293,7 @@ function tooMany() {
             schema: {
                 type: 'object',
                 properties: {
-                    status: { type: 'number' },
+                    status: { type: 'number', enum: [429] },
                     message: { type: 'string' }
                 }
             }
@@ -312,7 +312,7 @@ function denied(description = 'permission denied') {
             schema: {
                 type: 'object',
                 properties: {
-                    status: { type: 'number' },
+                    status: { type: 'number', enum: [403] },
                     message: { type: 'string' }
                 }
             }
@@ -330,7 +330,7 @@ function success(description, schema, meta = {}) {
             description,
             schema: {
                 type: 'object',
-                properties: Object.assign({ status: { type: 'number' }, message: { type: 'string' } }, meta, (schema ? { data: schema } : {}))
+                properties: Object.assign({ status: { type: 'number', enum: [200] }, message: { type: 'string' } }, meta, (schema ? { data: schema } : {}))
             }
         }
     };
@@ -347,7 +347,7 @@ function invalid(description = 'invalid request') {
             schema: {
                 type: 'object',
                 properties: {
-                    status: { type: 'number' },
+                    status: { type: 'number', enum: [400] },
                     message: { type: 'string' }
                 }
             }
