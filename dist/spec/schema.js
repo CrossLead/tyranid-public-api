@@ -235,6 +235,9 @@ function schemaType(field, path, includeOverride) {
             return utils_1.upperSnake(v.name);
         });
     }
+    if (linkCollection && !linkCollection.def.enum) {
+        out['x-tyranid-openapi-object-id'] = true;
+    }
     return out;
 }
 const INCLUDE_CACHE = {};

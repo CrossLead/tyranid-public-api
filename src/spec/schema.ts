@@ -297,6 +297,10 @@ function schemaType(
     });
   }
 
+  if (linkCollection && !linkCollection.def.enum) {
+    out['x-tyranid-openapi-object-id'] = true;
+  }
+
   return out;
 }
 
