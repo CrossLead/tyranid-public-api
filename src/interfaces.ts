@@ -26,6 +26,10 @@ export interface FieldSchemaOptions extends SchemaOptions {
    * property should be returned / accepted by api
    */
   include?: ('read' | 'write') | Method[];
+  /**
+   * override tyranid required field
+   */
+  required?: boolean;
 }
 
 export interface CollectionSchemaOptions extends SchemaOptions {

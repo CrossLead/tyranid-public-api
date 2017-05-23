@@ -268,8 +268,9 @@ function getRequiredChildProps(field) {
     utils_1.each(field.fields, (f, name) => {
         const opts = utils_1.options(f.def);
         const propName = opts.name || name;
-        if (f.def.openAPI && f.def.required)
+        if (f.def.openAPI && ('required' in opts ? opts.required : f.def.required)) {
             props.push(propName);
+        }
     });
     return props;
 }

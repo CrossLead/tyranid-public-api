@@ -337,7 +337,9 @@ function getRequiredChildProps(field: Tyr.FieldInstance | Tyr.CollectionDefiniti
   each(field.fields, (f, name) => {
     const opts = options(f.def);
     const propName = opts.name || name;
-    if (f.def.openAPI && f.def.required) props.push(propName);
+    if (f.def.openAPI && ('required' in opts ? opts.required : f.def.required)) {
+      props.push(propName);
+    }
   });
 
   return props;
