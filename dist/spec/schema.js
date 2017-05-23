@@ -189,8 +189,13 @@ function schemaType(field, path, includeOverride) {
           has no \`fields\` property`);
             }
             const subType = schemaObject(subfields, path);
-            if (subType)
+            if (subType) {
                 out.properties = subType;
+                const requiredProps = getRequiredChildProps(field);
+                if (requiredProps.length) {
+                    out.required = requiredProps.filter(p => p in out.properties);
+                }
+            }
             break;
         }
         default: return utils_1.error(`field "${path}" is of unsupported type: ${type}`);

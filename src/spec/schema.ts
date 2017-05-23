@@ -240,8 +240,13 @@ function schemaType(
       }
 
       const subType = schemaObject(subfields, path);
-      if (subType) out.properties = subType;
-
+      if (subType) {
+        out.properties = subType;
+        const requiredProps = getRequiredChildProps(field);
+        if (requiredProps.length) {
+          out.required = requiredProps.filter(p => p in out.properties!);
+        }
+      }
       break;
     }
 
