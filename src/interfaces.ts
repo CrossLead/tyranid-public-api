@@ -8,6 +8,7 @@ export interface ExtendedSchema extends Schema {
   ['x-tyranid-openapi-object-id']?: boolean;
   ['x-tyranid-openapi-methods']?: Method[];
   ['x-tyranid-openapi-name']?: string;
+  ['x-tyranid-openapi-enum-collection-id']?: string;
 }
 
 export interface SchemaOptions {

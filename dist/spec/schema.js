@@ -235,6 +235,7 @@ function schemaType(field, path, includeOverride) {
      */
     if (linkCollection && linkCollection.def.enum) {
         const description = [];
+        out['x-tyranid-openapi-enum-collection-id'] = linkCollection.def.id;
         out.enum = linkCollection.def.values.map((v) => {
             if (!v.name)
                 throw new Error(`No name property for enum link ${linkCollection.def.name}`);
