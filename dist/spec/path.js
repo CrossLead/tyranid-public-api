@@ -153,7 +153,7 @@ function path(def, lookup) {
         const filteredSchema = filterSchemaForMethod('get', schemaDef.schema);
         if (!filteredSchema)
             throw new Error(`No schema for get after filtering`);
-        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...baseParameters.DEFAULT_PARAMETERS), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`array of ${pascalName} objects`, {
+        baseRoutes.path.get = Object.assign({}, common, returns, parameters(...baseParameters.DEFAULT_PARAMETERS), addScopes('read'), { summary: `retrieve multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`array of ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
                 items: filteredSchema
@@ -193,7 +193,7 @@ function path(def, lookup) {
                 maxItems: MAX_ARRAY_ITEMS,
                 items: filteredBodySchema
             }
-        }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`created ${pascalName} objects`, {
+        }), { summary: `create new ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`created ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
                 items: filteredResponseSchema
@@ -219,7 +219,7 @@ function path(def, lookup) {
                 maxItems: MAX_ARRAY_ITEMS,
                 items: filteredBodySchema
             }
-        }), { summary: `update multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} objects`, {
+        }), { summary: `update multiple ${pascalName} objects`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`updated ${pascalName} objects`, {
                 type: 'array',
                 maxItems: MAX_ARRAY_ITEMS,
                 items: filteredResponseSchema
@@ -240,7 +240,7 @@ function path(def, lookup) {
             },
             description: `IDs of the ${pascalName} objects to delete`,
             required: true
-        }), { summary: `delete multiple ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${pascalName} objects`)) });
+        }), { summary: `delete multiple ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`deletes the ${pascalName} objects`)) });
     }
     /**
      *
@@ -256,7 +256,7 @@ function path(def, lookup) {
      * GET /<collection>/{_id}
      */
     if (includeMethod('get')) {
-        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${pascalName} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), tooMany(), success(`sends the ${pascalName} object`, schemaRef)) });
+        singleIdRoutes.path.get = Object.assign({ summary: `retrieve an individual ${pascalName} object` }, common, returns, addScopes('read'), parameters(idParameter), { responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`sends the ${pascalName} object`, schemaRef)) });
     }
     /**
      * PUT /<collection>/{_id}
@@ -268,13 +268,13 @@ function path(def, lookup) {
             description: `Modified ${pascalName} object`,
             required: true,
             schema: putSchema
-        }), { summary: `update single ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`updated ${pascalName} object`, schemaRef)) });
+        }), { summary: `update single ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`updated ${pascalName} object`, schemaRef)) });
     }
     /**
      * DELETE /<collection>/{_id}
      */
     if (includeMethod('delete')) {
-        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), success(`deletes the ${pascalName} object`)) });
+        singleIdRoutes.path.delete = Object.assign({}, common, addScopes('write'), parameters(idParameter), { summary: `delete an individual ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`deletes the ${pascalName} object`)) });
     }
     /**
      * remove any path entries that don't have any methods
@@ -313,6 +313,25 @@ function denied(description = 'permission denied') {
                 type: 'object',
                 properties: {
                     status: { type: 'number', enum: [403] },
+                    message: { type: 'string' }
+                }
+            }
+        }
+    };
+}
+/**
+ * create a 500 response
+ *
+ * @param description message for denial
+ */
+function internalError() {
+    return {
+        500: {
+            description: 'Internal server error',
+            schema: {
+                type: 'object',
+                properties: {
+                    status: { type: 'number', enum: [500] },
                     message: { type: 'string' }
                 }
             }

@@ -197,6 +197,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`array of ${pascalName} objects`, {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
@@ -251,6 +252,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`created ${pascalName} objects`, {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
@@ -290,6 +292,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`updated ${pascalName} objects`, {
           type: 'array',
           maxItems: MAX_ARRAY_ITEMS,
@@ -323,6 +326,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`deletes the ${pascalName} objects`)
       }
     };
@@ -353,6 +357,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`sends the ${pascalName} object`, schemaRef)
       }
     };
@@ -378,6 +383,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`updated ${pascalName} object`, schemaRef)
       }
     };
@@ -396,6 +402,7 @@ export function path(
         ...denied(),
         ...invalid(),
         ...tooMany(),
+        ...internalError(),
         ...success(`deletes the ${pascalName} object`)
       }
     };
@@ -440,6 +447,26 @@ function denied(description = 'permission denied') {
         type: 'object',
         properties: {
           status: { type: 'number', enum: [ 403 ] },
+          message: { type: 'string' }
+        }
+      }
+    }
+  };
+}
+
+/**
+ * create a 500 response
+ *
+ * @param description message for denial
+ */
+function internalError() {
+  return {
+    500: {
+      description: 'Internal server error',
+      schema: {
+        type: 'object',
+        properties: {
+          status: { type: 'number', enum: [ 500 ] },
           message: { type: 'string' }
         }
       }
