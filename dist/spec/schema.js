@@ -100,7 +100,8 @@ function schemaType(field, path, includeOverride) {
         !methods.has('post') &&
         !methods.has('delete'));
     const out = {
-        ['x-tyranid-openapi-name-path']: field.namePath.name
+        ['x-tyranid-openapi-name-path']: field.namePath.name,
+        ['x-tyranid-openapi-name']: field.name
     };
     switch (type) {
         /**

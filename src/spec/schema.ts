@@ -130,7 +130,8 @@ function schemaType(
   );
 
   const out: ExtendedSchema = {
-    ['x-tyranid-openapi-name-path']: field.namePath.name
+    ['x-tyranid-openapi-name-path']: field.namePath.name,
+    ['x-tyranid-openapi-name']: field.name
   };
 
   switch (type) {

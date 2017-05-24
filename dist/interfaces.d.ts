@@ -5,6 +5,7 @@ export interface ExtendedSchema extends Schema {
     ['x-tyranid-openapi-name-path']?: string;
     ['x-tyranid-openapi-object-id']?: boolean;
     ['x-tyranid-openapi-methods']?: Method[];
+    ['x-tyranid-openapi-name']?: string;
 }
 export interface SchemaOptions {
     /**
