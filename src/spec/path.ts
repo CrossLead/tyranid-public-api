@@ -3,6 +3,7 @@ import { Tyr } from 'tyranid';
 import { ExtendedSchema, Method, PathContainer, SchemaContainer } from '../interfaces';
 import { each, error, options, pascal, pick } from '../utils';
 import * as baseParameters from './base-find-parameters';
+import ErrorResponse from './error-schema';
 import { createScope, requireScopes } from './security';
 
 const MAX_ARRAY_ITEMS = 200;
@@ -155,9 +156,7 @@ export function path(
     return requireScopes(...scopes);
   };
 
-  const schemaRef = {
-    $ref: `#/definitions/${pascalName}`
-  };
+  const schemaRef = toRef(pascalName);
 
   const idParameter: Parameter = {
     name: '_id',
@@ -423,13 +422,7 @@ function tooMany() {
   return {
     429: {
       description: 'too many requests',
-      schema: {
-        type: 'object',
-        properties: {
-          status: { type: 'number', enum: [ 429 ] },
-          message: { type: 'string' }
-        }
-      }
+      schema: errorRef('ErrorTooManyRequests')
     }
   };
 }
@@ -443,13 +436,7 @@ function denied(description = 'permission denied') {
   return {
     403: {
       description,
-      schema: {
-        type: 'object',
-        properties: {
-          status: { type: 'number', enum: [ 403 ] },
-          message: { type: 'string' }
-        }
-      }
+      schema: errorRef('ErrorPermissionDenied')
     }
   };
 }
@@ -463,13 +450,7 @@ function internalError() {
   return {
     500: {
       description: 'Internal server error',
-      schema: {
-        type: 'object',
-        properties: {
-          status: { type: 'number', enum: [ 500 ] },
-          message: { type: 'string' }
-        }
-      }
+      schema: errorRef('ErrorInternalServer')
     }
   };
 }
@@ -509,13 +490,7 @@ function invalid(description = 'invalid request') {
   return {
     400: {
       description,
-      schema: {
-        type: 'object',
-        properties: {
-          status: { type: 'number', enum: [ 400 ] },
-          message: { type: 'string' }
-        }
-      }
+      schema: errorRef('ErrorInvalidRequest')
     }
   };
 }
@@ -626,4 +601,24 @@ function filterSchemaForMethod(method: Method, schema: ExtendedSchema): Extended
 function includePropertyForMethod(method: Method, schema: ExtendedSchema) {
   const methods: Method[] | void = schema['x-tyranid-openapi-methods'];
   return !methods || (methods.indexOf(method) !== -1);
+}
+
+/**
+ * Return ref object for error
+ *
+ * @param name name of error response
+ */
+function errorRef(name: keyof (typeof ErrorResponse)) {
+  return toRef(name);
+}
+
+/**
+ * Create ref object for schema
+ *
+ * @param name schema name
+ */
+function toRef(name: string) {
+  return {
+    $ref: `#/definitions/${name}`
+  };
 }

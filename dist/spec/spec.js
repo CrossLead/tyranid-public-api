@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../utils");
+const error_schema_1 = require("./error-schema");
 const path_1 = require("./path");
 const schema_1 = require("./schema");
 const security_1 = require("./security");
@@ -36,6 +37,12 @@ function spec(Tyr, opts = {}) {
         const result = schema_1.schema(col.def);
         lookup[result.id] = result;
         specObject.definitions[result.pascalName] = result.schema;
+    });
+    /**
+     * add error refs
+     */
+    utils_1.each(error_schema_1.default, (schema, name) => {
+        specObject.definitions[name] = schema;
     });
     /**
      * create routes referencing relevant schema

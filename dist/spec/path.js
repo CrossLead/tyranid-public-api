@@ -125,9 +125,7 @@ function path(def, lookup) {
         }
         return security_1.requireScopes(...scopes);
     };
-    const schemaRef = {
-        $ref: `#/definitions/${pascalName}`
-    };
+    const schemaRef = toRef(pascalName);
     const idParameter = {
         name: '_id',
         in: 'path',
@@ -290,13 +288,7 @@ function tooMany() {
     return {
         429: {
             description: 'too many requests',
-            schema: {
-                type: 'object',
-                properties: {
-                    status: { type: 'number', enum: [429] },
-                    message: { type: 'string' }
-                }
-            }
+            schema: errorRef('ErrorTooManyRequests')
         }
     };
 }
@@ -309,13 +301,7 @@ function denied(description = 'permission denied') {
     return {
         403: {
             description,
-            schema: {
-                type: 'object',
-                properties: {
-                    status: { type: 'number', enum: [403] },
-                    message: { type: 'string' }
-                }
-            }
+            schema: errorRef('ErrorPermissionDenied')
         }
     };
 }
@@ -328,13 +314,7 @@ function internalError() {
     return {
         500: {
             description: 'Internal server error',
-            schema: {
-                type: 'object',
-                properties: {
-                    status: { type: 'number', enum: [500] },
-                    message: { type: 'string' }
-                }
-            }
+            schema: errorRef('ErrorInternalServer')
         }
     };
 }
@@ -363,13 +343,7 @@ function invalid(description = 'invalid request') {
     return {
         400: {
             description,
-            schema: {
-                type: 'object',
-                properties: {
-                    status: { type: 'number', enum: [400] },
-                    message: { type: 'string' }
-                }
-            }
+            schema: errorRef('ErrorInvalidRequest')
         }
     };
 }
@@ -463,5 +437,23 @@ function filterSchemaForMethod(method, schema) {
 function includePropertyForMethod(method, schema) {
     const methods = schema['x-tyranid-openapi-methods'];
     return !methods || (methods.indexOf(method) !== -1);
+}
+/**
+ * Return ref object for error
+ *
+ * @param name name of error response
+ */
+function errorRef(name) {
+    return toRef(name);
+}
+/**
+ * Create ref object for schema
+ *
+ * @param name schema name
+ */
+function toRef(name) {
+    return {
+        $ref: `#/definitions/${name}`
+    };
 }
 //# sourceMappingURL=path.js.map

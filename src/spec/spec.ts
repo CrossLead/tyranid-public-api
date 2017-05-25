@@ -7,7 +7,8 @@ import {
 
 import { Tyr as Tyranid } from 'tyranid';
 import { ExtendedSchema, Options, SchemaContainer } from '../interfaces';
-import { error, options, validate, yaml } from '../utils';
+import { each, error, options, validate, yaml } from '../utils';
+import ErrorResponse from './error-schema';
 import { path } from './path';
 import { schema } from './schema';
 
@@ -69,6 +70,13 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     const result = schema(col.def);
     lookup[result.id] = result;
     specObject.definitions[result.pascalName] = result.schema;
+  });
+
+  /**
+   * add error refs
+   */
+  each(ErrorResponse, (schema, name) => {
+    specObject.definitions[name] = schema;
   });
 
   /**
