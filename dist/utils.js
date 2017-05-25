@@ -101,4 +101,14 @@ function upperSnake(str) {
     return str.split(/\s+/).join('_').toUpperCase();
 }
 exports.upperSnake = upperSnake;
+/**
+ * pluralize string
+ * TODO: add better algorithm
+ *
+ * @param str string to pluralize
+ */
+function pluralize(str) {
+    return str.endsWith('s') ? str : str + 's';
+}
+exports.pluralize = pluralize;
 //# sourceMappingURL=utils.js.map

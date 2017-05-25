@@ -1,7 +1,7 @@
 import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import { ExtendedSchema, Method, PathContainer, SchemaContainer } from '../interfaces';
-import { each, error, options, pascal, pick } from '../utils';
+import { each, error, options, pascal, pick, pluralize } from '../utils';
 import * as baseParameters from './base-find-parameters';
 import ErrorResponse from './error-schema';
 import { createScope, requireScopes } from './security';
@@ -21,7 +21,6 @@ export function path(
   const opts = options(def);
   const methods = new Set(opts.methods || [ 'all' ]);
   const includeMethod = (route: string) => methods.has(route) || methods.has('all');
-  const pluralize = (str: string) => str.endsWith('s') ? str : str + 's';
   const schemaDef = lookup[def.id];
   const baseCollectionName = pluralize(schemaDef.name);
   const baseRouteParameters: Parameter[] = [];
@@ -41,6 +40,8 @@ export function path(
   let baseCollectionRoute = baseCollectionName;
 
   let parentScopeBase = '';
+
+  let tag = baseCollectionName;
 
   /**
    * find id linking to parent
@@ -87,6 +88,7 @@ export function path(
     delete postSchema.properties![parentField.name];
 
     parentScopeBase = pluralize(parentDef.name);
+    tag = parentScopeBase;
 
     /**
      * /metrics/{metricId}/metricTargets -> /metrics/{metricId}/targets
@@ -124,7 +126,10 @@ export function path(
   };
 
   const common = {
-    ['x-tyranid-openapi-collection-id']: def.id
+    ['x-tyranid-openapi-collection-id']: def.id,
+    tags: [
+      tag
+    ]
   };
 
   const returns = {

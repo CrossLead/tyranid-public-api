@@ -7,7 +7,7 @@ import {
 
 import { Tyr as Tyranid } from 'tyranid';
 import { ExtendedSchema, Options, SchemaContainer } from '../interfaces';
-import { each, error, options, validate, yaml } from '../utils';
+import { each, error, options, pluralize, validate, yaml } from '../utils';
 import ErrorResponse from './error-schema';
 import { path } from './path';
 import { schema } from './schema';
@@ -90,7 +90,6 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     }
 
     const colOpts = options(col.def);
-
     if (!colOpts.parent || !colOpts.useParentScope) {
       // add scopes for this collection
       Object.assign(

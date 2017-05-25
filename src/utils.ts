@@ -126,3 +126,13 @@ export function pick<T, K extends keyof T>(obj: T, keys: K[]) {
 export function upperSnake(str: string) {
   return str.split(/\s+/).join('_').toUpperCase();
 }
+
+/**
+ * pluralize string
+ * TODO: add better algorithm
+ *
+ * @param str string to pluralize
+ */
+export function pluralize(str: string) {
+  return str.endsWith('s') ? str : str + 's';
+}

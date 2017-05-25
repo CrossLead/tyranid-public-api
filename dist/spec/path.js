@@ -14,9 +14,8 @@ function path(def, lookup) {
     const opts = utils_1.options(def);
     const methods = new Set(opts.methods || ['all']);
     const includeMethod = (route) => methods.has(route) || methods.has('all');
-    const pluralize = (str) => str.endsWith('s') ? str : str + 's';
     const schemaDef = lookup[def.id];
-    const baseCollectionName = pluralize(schemaDef.name);
+    const baseCollectionName = utils_1.pluralize(schemaDef.name);
     const baseRouteParameters = [];
     const { pascalName, schema } = schemaDef;
     const cloneSchema = () => JSON.parse(JSON.stringify(schemaDef.schema));
@@ -28,6 +27,7 @@ function path(def, lookup) {
     postSchema.properties = filterNotReadOnly(postSchema.properties || {});
     let baseCollectionRoute = baseCollectionName;
     let parentScopeBase = '';
+    let tag = baseCollectionName;
     /**
      * find id linking to parent
      */
@@ -67,7 +67,8 @@ function path(def, lookup) {
          */
         delete putSchema.properties[parentField.name];
         delete postSchema.properties[parentField.name];
-        parentScopeBase = pluralize(parentDef.name);
+        parentScopeBase = utils_1.pluralize(parentDef.name);
+        tag = parentScopeBase;
         /**
          * /metrics/{metricId}/metricTargets -> /metrics/{metricId}/targets
          */
@@ -84,7 +85,7 @@ function path(def, lookup) {
          *       append child routes to the created parent route
          */
         baseCollectionRoute = [
-            pluralize(parentDef.name),
+            utils_1.pluralize(parentDef.name),
             `{${parentField.name}}`,
             subRouteName
         ].join('/');
@@ -100,7 +101,10 @@ function path(def, lookup) {
         paths: []
     };
     const common = {
-        ['x-tyranid-openapi-collection-id']: def.id
+        ['x-tyranid-openapi-collection-id']: def.id,
+        tags: [
+            tag
+        ]
     };
     const returns = {
         produces: [

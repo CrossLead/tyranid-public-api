@@ -57,3 +57,10 @@ export declare function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K
  * @param str string
  */
 export declare function upperSnake(str: string): string;
+/**
+ * pluralize string
+ * TODO: add better algorithm
+ *
+ * @param str string to pluralize
+ */
+export declare function pluralize(str: string): string;
