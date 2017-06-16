@@ -27,6 +27,10 @@ export interface FieldSchemaOptions extends SchemaOptions {
      * override tyranid required field
      */
     required?: boolean;
+    /**
+     * implementation should perform shallow cycle detection
+     */
+    cycleCheck?: boolean;
 }
 export interface CollectionSchemaOptions extends SchemaOptions {
     /**
