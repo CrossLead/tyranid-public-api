@@ -386,7 +386,11 @@ export function path(
            */
           const clone = JSON.parse(JSON.stringify(putSchema)) as ExtendedSchema;
           const required = (clone.required || []).filter(p => p !== '_id');
-          clone.required = required.length ? required : undefined;
+          if (required.length) {
+            clone.required = required;
+          } else {
+            delete clone.required;
+          }
           return clone;
         })()
       }),

@@ -270,6 +270,9 @@ function path(def, lookup) {
             description: `Modified ${pascalName} object`,
             required: true,
             schema: (() => {
+                /**
+                 * remove _id from required properties on put with `_id` in path
+                 */
                 const clone = JSON.parse(JSON.stringify(putSchema));
                 const required = (clone.required || []).filter(p => p !== '_id');
                 if (required.length) {
