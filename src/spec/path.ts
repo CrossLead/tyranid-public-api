@@ -380,7 +380,15 @@ export function path(
         in: 'body',
         description: `Modified ${pascalName} object`,
         required: true,
-        schema: putSchema
+        schema: (() => {
+          /**
+           * remove _id from required properties on put with `_id` in path
+           */
+          const clone = JSON.parse(JSON.stringify(putSchema)) as ExtendedSchema;
+          const required = (clone.required || []).filter(p => p !== '_id');
+          clone.required = required.length ? required : undefined;
+          return clone;
+        })()
       }),
       summary: `update single ${pascalName} object`,
       responses: {

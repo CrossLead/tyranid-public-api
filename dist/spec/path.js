@@ -269,7 +269,17 @@ function path(def, lookup) {
             in: 'body',
             description: `Modified ${pascalName} object`,
             required: true,
-            schema: putSchema
+            schema: (() => {
+                const clone = JSON.parse(JSON.stringify(putSchema));
+                const required = (clone.required || []).filter(p => p !== '_id');
+                if (required.length) {
+                    clone.required = required;
+                }
+                else {
+                    delete clone.required;
+                }
+                return clone;
+            })()
         }), { summary: `update single ${pascalName} object`, responses: Object.assign({}, denied(), invalid(), tooMany(), internalError(), success(`updated ${pascalName} object`, schemaRef)) });
     }
     /**

@@ -27,7 +27,7 @@
     "swagger-schema-official": "^2.0.0-bab6bed"
   },
   "peerDependencies": {
-    "tyranid": "^0.1.45"
+    "tyranid": "^0.1.57"
   },
   "devDependencies": {
     "@types/js-yaml": "3.5.29",
