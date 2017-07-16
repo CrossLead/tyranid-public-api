@@ -2,11 +2,10 @@
  * error response schema
  */
 export default {
-
   ErrorInvalidRequest: {
     type: 'object',
     properties: {
-      status: { type: 'number', enum: [ 400 ] },
+      status: { type: 'number', enum: [400] },
       message: { type: 'string' }
     }
   },
@@ -14,7 +13,7 @@ export default {
   ErrorInternalServer: {
     type: 'object',
     properties: {
-      status: { type: 'number', enum: [ 500 ] },
+      status: { type: 'number', enum: [500] },
       message: { type: 'string' }
     }
   },
@@ -22,7 +21,7 @@ export default {
   ErrorPermissionDenied: {
     type: 'object',
     properties: {
-      status: { type: 'number', enum: [ 403 ] },
+      status: { type: 'number', enum: [403] },
       message: { type: 'string' }
     }
   },
@@ -30,9 +29,8 @@ export default {
   ErrorTooManyRequests: {
     type: 'object',
     properties: {
-      status: { type: 'number', enum: [ 429 ] },
+      status: { type: 'number', enum: [429] },
       message: { type: 'string' }
     }
   }
-
 };

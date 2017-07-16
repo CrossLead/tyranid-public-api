@@ -10,7 +10,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "lint:fix": "tslint --fix -c tslint.json './src/**/*.ts'",
-    "lint": "tslint -c tslint.json './src/**/*.ts'"
+    "lint": "tslint -c tslint.json './src/**/*.ts'",
+    "prettier": "prettier --single-quote --write ./src/**/*.ts ./src/*.ts"
   },
   "keywords": [
     "tyranid",
@@ -27,17 +28,18 @@
     "swagger-schema-official": "^2.0.0-bab6bed"
   },
   "peerDependencies": {
-    "tyranid": "^0.1.57"
+    "tyranid": "^0.2.2"
   },
   "devDependencies": {
-    "@types/js-yaml": "3.5.29",
-    "@types/lodash": "4.14.62",
-    "@types/node": "6.0.68",
+    "@types/js-yaml": "^3.5.29",
+    "@types/lodash": "^4.14.69",
+    "@types/node": "^6.0.68",
     "ava": "0.19.1",
+    "prettier": "^1.5.3",
     "tslint": "5.1.0",
-    "typedoc": "^0.6.0",
-    "typescript": "2.3.1",
-    "tyranid": "^0.1.57"
+    "typedoc": "^0.7.1",
+    "typescript": "2.4.1",
+    "tyranid": "^0.2.2"
   },
   "ava": {
     "files": [

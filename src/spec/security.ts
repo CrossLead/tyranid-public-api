@@ -8,13 +8,16 @@ import { Security } from 'swagger-schema-official';
  * @param host api host url
  * @param scopes hash of scopes
  */
-export function createSecurityDefinitions(host: string, scopes: { [key: string]: string }) {
+export function createSecurityDefinitions(
+  host: string,
+  scopes: { [key: string]: string }
+) {
   return {
     default: {
-      type: "oauth2",
+      type: 'oauth2',
       authorizationUrl: `${host}/oauth2/authorize`,
       tokenUrl: `${host}/oauth2/token`,
-      flow: "accessCode",
+      flow: 'accessCode',
       scopes
     }
   };

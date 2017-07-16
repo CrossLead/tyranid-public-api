@@ -17,13 +17,11 @@ const _1 = require("../");
  */
 ava_1.default.before((t) => __awaiter(this, void 0, void 0, function* () {
     yield tyranid_1.Tyr.config({
-        validate: [
-            { glob: path_1.join(__dirname, './models/*.js') },
-        ],
+        validate: [{ glob: path_1.join(__dirname, './models/*.js') }]
     });
     t.truthy(tyranid_1.Tyr.collections.length);
 }));
-ava_1.default('pascalCase should return correct values', (t) => {
+ava_1.default('pascalCase should return correct values', t => {
     t.is(_1.pascal('my short sentence'), 'MyShortSentence');
     t.is(_1.pascal('my_snake_sentence'), 'MySnakeSentence');
 });

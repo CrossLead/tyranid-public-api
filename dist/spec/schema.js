@@ -87,18 +87,12 @@ function schemaType(field, path, includeOverride) {
         return;
     const linkCollection = field.def.link && tyranid_1.Tyr.byName[field.def.link];
     // TODO: should links be refs?
-    const type = linkCollection
-        ? 'string'
-        : field.def.is;
+    const type = linkCollection ? 'string' : field.def.is;
     const opts = utils_1.options(field.def);
     const methods = new Set(Array.isArray(opts.include)
         ? opts.include
-        : (opts.include === 'read'
-            ? ['get']
-            : ['get', 'put', 'post', 'delete']));
-    const readOnly = (!methods.has('put') &&
-        !methods.has('post') &&
-        !methods.has('delete'));
+        : opts.include === 'read' ? ['get'] : ['get', 'put', 'post', 'delete']);
+    const readOnly = !methods.has('put') && !methods.has('post') && !methods.has('delete');
     const out = {
         ['x-tyranid-openapi-name-path']: field.namePath.name,
         ['x-tyranid-openapi-name']: field.name
@@ -199,7 +193,8 @@ function schemaType(field, path, includeOverride) {
             }
             break;
         }
-        default: return utils_1.error(`field "${path}" is of unsupported type: ${type}`);
+        default:
+            return utils_1.error(`field "${path}" is of unsupported type: ${type}`);
     }
     /**
      * add formats
@@ -227,7 +222,7 @@ function schemaType(field, path, includeOverride) {
      * add note from schema
      */
     if (opts.note || field.def.note) {
-        out.description = (opts.note || field.def.note || '').replace(/\t+/mg, '');
+        out.description = (opts.note || field.def.note || '').replace(/\t+/gm, '');
     }
     /**
      * if property is link to enum collection,
@@ -259,8 +254,8 @@ function include(field, path) {
         return INCLUDE_CACHE[path];
     if ((field.fields && utils_1.each(field.fields, include)) ||
         (field.of && include(field.of, extendPath(name, path))) ||
-        (field.def.openAPI))
-        return INCLUDE_CACHE[path] = true;
+        field.def.openAPI)
+        return (INCLUDE_CACHE[path] = true);
     INCLUDE_CACHE[path] = false;
 }
 /**
@@ -275,7 +270,8 @@ function getRequiredChildProps(field) {
     utils_1.each(field.fields, (f, name) => {
         const opts = utils_1.options(f.def);
         const propName = opts.name || name;
-        if (f.def.openAPI && ('required' in opts ? opts.required : f.def.required)) {
+        if (f.def.openAPI &&
+            ('required' in opts ? opts.required : f.def.required)) {
             props.push(propName);
         }
     });

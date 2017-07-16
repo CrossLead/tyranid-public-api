@@ -63,7 +63,7 @@ export interface PathContainer {
   id: string;
   base: string;
   paths: {
-    route: string,
+    route: string;
     path: Path;
   }[];
 }
