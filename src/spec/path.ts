@@ -4,7 +4,8 @@ import {
   ExtendedSchema,
   Method,
   PathContainer,
-  SchemaContainer
+  SchemaContainer,
+  IndividualCollectionSchemaOptions
 } from '../interfaces';
 import { each, error, options, pascal, pick, pluralize } from '../utils';
 import * as baseParameters from './base-find-parameters';
@@ -21,9 +22,9 @@ const MAX_ARRAY_ITEMS = 200;
  */
 export function path(
   def: Tyr.CollectionDefinitionHydrated,
+  opts: IndividualCollectionSchemaOptions,
   lookup: { [key: string]: SchemaContainer }
 ): PathContainer {
-  const opts = options(def);
   const methods = new Set(opts.methods || ['all']);
   const includeMethod = (route: string) =>
     methods.has(route) || methods.has('all');

@@ -9,6 +9,7 @@ export interface ExtendedSchema extends Schema {
   ['x-tyranid-openapi-methods']?: Method[];
   ['x-tyranid-openapi-name']?: string;
   ['x-tyranid-openapi-enum-collection-id']?: string;
+  ['x-tyranid-openapi-partition-partial-filter-expression']?: any;
 }
 
 export interface SchemaOptions {
@@ -36,6 +37,10 @@ export interface FieldSchemaOptions extends SchemaOptions {
    * implementation should perform shallow cycle detection
    */
   cycleCheck?: boolean;
+  /**
+   * only include this field for specific partition(s)
+   */
+  partition?: string | string[];
 }
 
 export type CollectionSchemaOptions =
@@ -58,6 +63,11 @@ export interface IndividualCollectionSchemaOptions extends SchemaOptions {
    * use parent scope for security (don't generate custom scope for this collection)
    */
   useParentScope?: true;
+
+  /**
+   * partition query (if partitioned)
+   */
+  partialFilterExpression: any;
 }
 
 export interface PartitionedCollectionSchemaOptions {
