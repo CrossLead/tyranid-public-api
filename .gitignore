@@ -5,3 +5,4 @@ test-spec.yaml
 api-test
 .tmp
 docs
+dist
