@@ -1,6 +1,11 @@
 import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
-import { ExtendedSchema, Method, PathContainer, SchemaContainer } from '../interfaces';
+import {
+  ExtendedSchema,
+  Method,
+  PathContainer,
+  SchemaContainer
+} from '../interfaces';
 import { each, error, options, pascal, pick, pluralize } from '../utils';
 import * as baseParameters from './base-find-parameters';
 import ErrorResponse from './error-schema';
@@ -19,21 +24,25 @@ export function path(
   lookup: { [key: string]: SchemaContainer }
 ): PathContainer {
   const opts = options(def);
-  const methods = new Set(opts.methods || [ 'all' ]);
-  const includeMethod = (route: string) => methods.has(route) || methods.has('all');
+  const methods = new Set(opts.methods || ['all']);
+  const includeMethod = (route: string) =>
+    methods.has(route) || methods.has('all');
   const schemaDef = lookup[def.id];
   const baseCollectionName = pluralize(schemaDef.name);
   const baseRouteParameters: Parameter[] = [];
 
   const { pascalName, schema } = schemaDef;
-  const cloneSchema = () => JSON.parse(JSON.stringify(schemaDef.schema)) as ExtendedSchema;
+  const cloneSchema = () =>
+    JSON.parse(JSON.stringify(schemaDef.schema)) as ExtendedSchema;
 
   const putSchema = cloneSchema();
   const postSchema = cloneSchema();
 
-  putSchema.properties = makeOptional(filterNotReadOnly(putSchema.properties || {}));
+  putSchema.properties = makeOptional(
+    filterNotReadOnly(putSchema.properties || {})
+  );
   putSchema.properties!._id = schemaDef.schema.properties!._id;
-  putSchema.required = [ '_id' ];
+  putSchema.required = ['_id'];
 
   postSchema.properties = filterNotReadOnly(postSchema.properties || {});
 
@@ -72,14 +81,16 @@ export function path(
     /**
      * add route parameter
      */
-    baseRouteParameters.push(({
-      name: parentField.name,
-      type: 'string',
-      in: 'path',
-      required: true,
-      description: 'ID of linked ' + parentDef.name,
-      ['x-tyranid-openapi-object-id']: true
-    } as {}) as Parameter);
+    baseRouteParameters.push(
+      ({
+        name: parentField.name,
+        type: 'string',
+        in: 'path',
+        required: true,
+        description: 'ID of linked ' + parentDef.name,
+        ['x-tyranid-openapi-object-id']: true
+      } as {}) as Parameter
+    );
 
     /**
      * remove parent link id from post schema
@@ -122,28 +133,21 @@ export function path(
   const out = {
     id: def.id,
     base: baseCollectionName,
-    paths: [] as { route: string, path: Path }[]
+    paths: [] as { route: string; path: Path }[]
   };
 
   const common = {
     ['x-tyranid-openapi-collection-id']: def.id,
-    tags: [
-      tag
-    ]
+    tags: [tag]
   };
 
   const returns = {
-    produces: [
-      'application/json'
-    ]
+    produces: ['application/json']
   };
 
   const parameters = (...params: Parameter[]) => {
     return {
-      parameters: [
-        ...baseRouteParameters,
-        ...params
-      ]
+      parameters: [...baseRouteParameters, ...params]
     };
   };
 
@@ -202,26 +206,42 @@ export function path(
         ...invalid(),
         ...tooMany(),
         ...internalError(),
-        ...success(`array of ${pascalName} objects`, {
-          type: 'array',
-          maxItems: MAX_ARRAY_ITEMS,
-          items: filteredSchema
-        }, {
-          paging: {
-            type: 'object',
-            description: 'Parameter settings for next page of results',
-            properties: (() => {
-              const props = {
-                $limit: pick(baseParameters.LIMIT, ['type', 'description', 'default']),
-                $skip: pick(baseParameters.SKIP, ['type', 'description', 'default']),
-                $sort: pick(baseParameters.SORT, ['type', 'description', 'default'])
-              };
+        ...success(
+          `array of ${pascalName} objects`,
+          {
+            type: 'array',
+            maxItems: MAX_ARRAY_ITEMS,
+            items: filteredSchema
+          },
+          {
+            paging: {
+              type: 'object',
+              description: 'Parameter settings for next page of results',
+              properties: (() => {
+                const props = {
+                  $limit: pick(baseParameters.LIMIT, [
+                    'type',
+                    'description',
+                    'default'
+                  ]),
+                  $skip: pick(baseParameters.SKIP, [
+                    'type',
+                    'description',
+                    'default'
+                  ]),
+                  $sort: pick(baseParameters.SORT, [
+                    'type',
+                    'description',
+                    'default'
+                  ])
+                };
 
-              props.$skip.default = props.$limit.default;
-              return props;
-            })()
+                props.$skip.default = props.$limit.default;
+                return props;
+              })()
+            }
           }
-        })
+        )
       }
     };
   }
@@ -231,10 +251,15 @@ export function path(
    */
   if (includeMethod('post')) {
     const filteredBodySchema = filterSchemaForMethod('post', postSchema);
-    if (!filteredBodySchema) throw new Error(`No schema for post after filtering`);
+    if (!filteredBodySchema)
+      throw new Error(`No schema for post after filtering`);
 
-    const filteredResponseSchema = filterSchemaForMethod('post', schemaDef.schema);
-    if (!filteredResponseSchema) throw new Error(`No schema for post after filtering`);
+    const filteredResponseSchema = filterSchemaForMethod(
+      'post',
+      schemaDef.schema
+    );
+    if (!filteredResponseSchema)
+      throw new Error(`No schema for post after filtering`);
 
     baseRoutes.path.post = {
       ...common,
@@ -271,10 +296,15 @@ export function path(
    */
   if (includeMethod('put')) {
     const filteredBodySchema = filterSchemaForMethod('put', putSchema);
-    if (!filteredBodySchema) throw new Error(`No schema for put after filtering`);
+    if (!filteredBodySchema)
+      throw new Error(`No schema for put after filtering`);
 
-    const filteredResponseSchema = filterSchemaForMethod('put', schemaDef.schema);
-    if (!filteredResponseSchema) throw new Error(`No schema for put after filtering`);
+    const filteredResponseSchema = filterSchemaForMethod(
+      'put',
+      schemaDef.schema
+    );
+    if (!filteredResponseSchema)
+      throw new Error(`No schema for put after filtering`);
 
     baseRoutes.path.put = {
       ...common,
@@ -488,10 +518,10 @@ function success(
       schema: {
         type: 'object',
         properties: {
-          status: { type: 'number', enum: [ 200 ] },
+          status: { type: 'number', enum: [200] },
           message: { type: 'string' },
           ...meta,
-          ...(schema ? { data: schema } : {}),
+          ...schema ? { data: schema } : {}
         }
       }
     }
@@ -517,9 +547,7 @@ function invalid(description = 'invalid request') {
  *
  * @param schemaHash properties field of a schema
  */
-function filterNotReadOnly(schemaHash: {
-  [key: string]: Schema
-}) {
+function filterNotReadOnly(schemaHash: { [key: string]: Schema }) {
   const keys = Object.keys(schemaHash);
   const out: { [key: string]: Schema } = {};
 
@@ -546,9 +574,7 @@ function filterNotReadOnly(schemaHash: {
  *
  * @param schemaHash properties field of a schema
  */
-function makeOptional(schemaHash: {
-  [key: string]: Schema
-}) {
+function makeOptional(schemaHash: { [key: string]: Schema }) {
   const keys = Object.keys(schemaHash);
   const out: { [key: string]: Schema } = {};
 
@@ -575,7 +601,10 @@ function makeOptional(schemaHash: {
  * @param method HTTP verb
  * @param schema schema with possible method metadata
  */
-function filterSchemaForMethod(method: Method, schema: ExtendedSchema): ExtendedSchema | void {
+function filterSchemaForMethod(
+  method: Method,
+  schema: ExtendedSchema
+): ExtendedSchema | void {
   if (!includePropertyForMethod(method, schema)) return;
 
   switch (schema.type) {
@@ -593,19 +622,23 @@ function filterSchemaForMethod(method: Method, schema: ExtendedSchema): Extended
 
     case 'object': {
       const out: ExtendedSchema = { ...schema, properties: {} };
-      each(schema.properties as { [key: string]: ExtendedSchema }, (prop, name) => {
-        const result = filterSchemaForMethod(method, prop);
-        if (result) {
-          out.properties![name] = result;
+      each(
+        schema.properties as { [key: string]: ExtendedSchema },
+        (prop, name) => {
+          const result = filterSchemaForMethod(method, prop);
+          if (result) {
+            out.properties![name] = result;
+          }
         }
-      });
+      );
       if (Array.isArray(out.required)) {
         out.required = out.required.filter(p => p in out.properties!);
       }
       return out;
     }
 
-    default: return schema;
+    default:
+      return schema;
   }
 }
 
@@ -617,7 +650,7 @@ function filterSchemaForMethod(method: Method, schema: ExtendedSchema): Extended
  */
 function includePropertyForMethod(method: Method, schema: ExtendedSchema) {
   const methods: Method[] | void = schema['x-tyranid-openapi-methods'];
-  return !methods || (methods.indexOf(method) !== -1);
+  return !methods || methods.indexOf(method) !== -1;
 }
 
 /**
@@ -625,7 +658,7 @@ function includePropertyForMethod(method: Method, schema: ExtendedSchema) {
  *
  * @param name name of error response
  */
-function errorRef(name: keyof (typeof ErrorResponse)) {
+function errorRef(name: keyof typeof ErrorResponse) {
   return toRef(name);
 }
 

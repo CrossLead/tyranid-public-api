@@ -7,11 +7,7 @@ import {
   SchemaOptions
 } from './interfaces';
 
-import {
-  Parameter,
-  Schema,
-  Spec
-} from 'swagger-schema-official';
+import { Parameter, Schema, Spec } from 'swagger-schema-official';
 
 /**
  * Convert a string to PascalCase
@@ -19,16 +15,14 @@ import {
  * @param str string to convert to Pascal case
  */
 export function pascal(str: string) {
-  const bits = str
-    .trim()
-    .replace(/[^a-zA-Z0-9]+/gm, '_')
-    .split('_');
+  const bits = str.trim().replace(/[^a-zA-Z0-9]+/gm, '_').split('_');
 
   let out = '';
   for (const bit of bits) {
-    out += bit.length < 2
-      ? (bit || '').toLocaleUpperCase()
-      : bit.charAt(0).toLocaleUpperCase() + bit.slice(1);
+    out +=
+      bit.length < 2
+        ? (bit || '').toLocaleUpperCase()
+        : bit.charAt(0).toLocaleUpperCase() + bit.slice(1);
   }
 
   return out;
@@ -75,7 +69,9 @@ export function each<T, S>(
  *
  * @param def tyranid collection or field definition with optional Open API opts
  */
-export function options(def: Tyr.CollectionDefinitionHydrated): CollectionSchemaOptions;
+export function options(
+  def: Tyr.CollectionDefinitionHydrated
+): CollectionSchemaOptions;
 export function options(def: Tyr.FieldDefinition): FieldSchemaOptions;
 export function options(def: { openAPI?: SchemaOptions | boolean }) {
   const openAPI = def.openAPI;
@@ -101,7 +97,7 @@ export function validate(spec: Spec) {
 
   return {
     valid: result,
-    errors:  (ajv.errors || []).slice()
+    errors: (ajv.errors || []).slice()
   };
 }
 

@@ -12,10 +12,7 @@ import ErrorResponse from './error-schema';
 import { path } from './path';
 import { schema } from './schema';
 
-import {
-  collectionScopes,
-  createSecurityDefinitions
-} from './security';
+import { collectionScopes, createSecurityDefinitions } from './security';
 
 /**
  * Given an instance of tyranid, create a Open API api spec
@@ -23,24 +20,28 @@ import {
  * @param Tyr initialized tyranid object
  * @param options schema generation options
  */
-export function spec(Tyr: typeof Tyranid, opts: Options & { yaml: true }): string;
-export function spec(Tyr: typeof Tyranid, opts?: Options & { yaml?: void | false }): Spec;
+export function spec(
+  Tyr: typeof Tyranid,
+  opts: Options & { yaml: true }
+): string;
+export function spec(
+  Tyr: typeof Tyranid,
+  opts?: Options & { yaml?: void | false }
+): Spec;
 export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   const {
-    version = "1.0.0",
-    description = "Public API generated from tyranid-open-api-spec",
-    title = "Public API",
-    host = "localhost:9000",
+    version = '1.0.0',
+    description = 'Public API generated from tyranid-open-api-spec',
+    title = 'Public API',
+    host = 'localhost:9000',
     basePath = '/',
-    schemes = [
-      'https'
-    ]
+    schemes = ['https']
   } = opts;
 
   const oauth2Scopes = {};
 
   const specObject = {
-    swagger: "2.0",
+    swagger: '2.0',
     info: {
       description,
       title,
@@ -53,7 +54,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     definitions: {} as { [key: string]: ExtendedSchema }
   };
 
-  const lookup = {} as {[key: string]: SchemaContainer };
+  const lookup = {} as { [key: string]: SchemaContainer };
   const collections = Tyr.collections.filter(c => c.def.openAPI);
 
   collections.sort((a, b) => {
@@ -99,9 +100,12 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
     }
   });
 
-  const [ scheme ] = schemes;
+  const [scheme] = schemes;
   Object.assign(specObject, {
-    securityDefinitions: createSecurityDefinitions(scheme + '://' + host, oauth2Scopes)
+    securityDefinitions: createSecurityDefinitions(
+      scheme + '://' + host,
+      oauth2Scopes
+    )
   });
 
   const result = validate(specObject);

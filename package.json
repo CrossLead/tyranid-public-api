@@ -10,14 +10,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "lint:fix": "tslint --fix -c tslint.json './src/**/*.ts'",
-    "lint": "tslint -c tslint.json './src/**/*.ts'"
+    "lint": "tslint -c tslint.json './src/**/*.ts'",
+    "prettier": "prettier --single-quote --write './src/**/*.ts'"
   },
-  "keywords": [
-    "tyranid",
-    "swagger",
-    "openapi",
-    "api"
-  ],
+  "keywords": ["tyranid", "swagger", "openapi", "api"],
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
@@ -34,14 +30,13 @@
     "@types/lodash": "4.14.62",
     "@types/node": "6.0.68",
     "ava": "0.19.1",
+    "prettier": "^1.5.3",
     "tslint": "5.1.0",
     "typedoc": "^0.6.0",
     "typescript": "2.3.1",
     "tyranid": "^0.1.57"
   },
   "ava": {
-    "files": [
-      "dist/test/index.js"
-    ]
+    "files": ["dist/test/index.js"]
   }
 }

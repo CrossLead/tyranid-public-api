@@ -14,5 +14,5 @@ export default new Tyr.Collection({
     organizationId: { is: 'mongoid' },
     date: { is: 'date', openAPI: true },
     value: { is: 'double', openAPI: true }
-  },
+  }
 });

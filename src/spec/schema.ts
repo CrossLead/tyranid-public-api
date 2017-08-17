@@ -1,5 +1,10 @@
 import { Tyr } from 'tyranid';
-import { ExtendedSchema, SchemaContainer, SchemaOptions } from '../interfaces';
+import {
+  ExtendedSchema,
+  SchemaContainer,
+  SchemaOptions,
+  IndividualCollectionSchemaOptions
+} from '../interfaces';
 import { each, error, options, pascal, upperSnake } from '../utils';
 
 /**
@@ -19,8 +24,8 @@ const PATH_MARKERS = {
  */
 export function schema(
   def: Tyr.CollectionDefinitionHydrated,
+  opts: IndividualCollectionSchemaOptions
 ) {
-  const opts = options(def);
   const name = opts.name || def.name;
   const pascalName = pascal(name);
 
@@ -61,10 +66,7 @@ export function schema(
  * @param path current path
  * @param next name of next property
  */
-function extendPath(
-  next: string,
-  path?: string
-) {
+function extendPath(next: string, path?: string) {
   if (!path) return next;
 
   return `${path}.${next}`;
@@ -109,25 +111,18 @@ function schemaType(
   const linkCollection = field.def.link && Tyr.byName[field.def.link];
 
   // TODO: should links be refs?
-  const type = linkCollection
-    ? 'string'
-    : field.def.is;
+  const type = linkCollection ? 'string' : field.def.is;
 
   const opts = options(field.def);
 
-  const methods = new Set(Array.isArray(opts.include)
-    ? opts.include
-    : (
-      opts.include === 'read'
-        ? ['get']
-        : ['get', 'put', 'post', 'delete']
-    ));
-
-  const readOnly = (
-    !methods.has('put') &&
-    !methods.has('post') &&
-    !methods.has('delete')
+  const methods = new Set(
+    Array.isArray(opts.include)
+      ? opts.include
+      : opts.include === 'read' ? ['get'] : ['get', 'put', 'post', 'delete']
   );
+
+  const readOnly =
+    !methods.has('put') && !methods.has('post') && !methods.has('delete');
 
   const out: ExtendedSchema = {
     ['x-tyranid-openapi-name-path']: field.namePath.name,
@@ -135,7 +130,6 @@ function schemaType(
   };
 
   switch (type) {
-
     /**
      * string aliases
      */
@@ -217,10 +211,7 @@ function schemaType(
           `);
         }
 
-        const subType = schemaType(
-          values,
-          extendPath(PATH_MARKERS.HASH, path)
-        );
+        const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
 
         if (subType) out.additionalProperties = subType;
         if (field.fields) {
@@ -251,14 +242,14 @@ function schemaType(
       break;
     }
 
-    default: return error(`field "${path}" is of unsupported type: ${type}`);
+    default:
+      return error(`field "${path}" is of unsupported type: ${type}`);
   }
 
   /**
    * add formats
    */
   switch (type) {
-
     case 'date':
     case 'password':
     case 'float':
@@ -271,7 +262,6 @@ function schemaType(
       out.format = 'i32';
       break;
     }
-
   }
 
   if (Array.isArray(opts.include)) {
@@ -286,9 +276,7 @@ function schemaType(
    * add note from schema
    */
   if (opts.note || field.def.note) {
-    out.description = (
-      opts.note || field.def.note || ''
-    ).replace(/\t+/mg, '');
+    out.description = (opts.note || field.def.note || '').replace(/\t+/gm, '');
   }
 
   /**
@@ -298,10 +286,15 @@ function schemaType(
   if (linkCollection && linkCollection.def.enum) {
     const description = [];
     out['x-tyranid-openapi-enum-collection-id'] = linkCollection.def.id;
-    out.enum = (linkCollection as any).def.values.map((v: { name?: string }) => {
-      if (!v.name) throw new Error(`No name property for enum link ${linkCollection.def.name}`);
-      return upperSnake(v.name);
-    });
+    out.enum = (linkCollection as any).def.values.map(
+      (v: { name?: string }) => {
+        if (!v.name)
+          throw new Error(
+            `No name property for enum link ${linkCollection.def.name}`
+          );
+        return upperSnake(v.name);
+      }
+    );
   }
 
   if (linkCollection && !linkCollection.def.enum) {
@@ -325,8 +318,9 @@ function include(field: Tyr.FieldInstance, path: string) {
   if (
     (field.fields && each(field.fields, include)) ||
     (field.of && include(field.of, extendPath(name, path))) ||
-    (field.def.openAPI)
-  ) return INCLUDE_CACHE[path] = true;
+    field.def.openAPI
+  )
+    return (INCLUDE_CACHE[path] = true);
 
   INCLUDE_CACHE[path] = false;
 }
@@ -336,7 +330,9 @@ function include(field: Tyr.FieldInstance, path: string) {
  *
  * @param field root tyranid def or object field
  */
-function getRequiredChildProps(field: Tyr.FieldInstance | Tyr.CollectionDefinitionHydrated) {
+function getRequiredChildProps(
+  field: Tyr.FieldInstance | Tyr.CollectionDefinitionHydrated
+) {
   const props: string[] = [];
 
   if (!field.fields) return props;
@@ -344,7 +340,10 @@ function getRequiredChildProps(field: Tyr.FieldInstance | Tyr.CollectionDefiniti
   each(field.fields, (f, name) => {
     const opts = options(f.def);
     const propName = opts.name || name;
-    if (f.def.openAPI && ('required' in opts ? opts.required : f.def.required)) {
+    if (
+      f.def.openAPI &&
+      ('required' in opts ? opts.required : f.def.required)
+    ) {
       props.push(propName);
     }
   });

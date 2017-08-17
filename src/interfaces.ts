@@ -38,7 +38,11 @@ export interface FieldSchemaOptions extends SchemaOptions {
   cycleCheck?: boolean;
 }
 
-export interface CollectionSchemaOptions extends SchemaOptions {
+export type CollectionSchemaOptions =
+  | IndividualCollectionSchemaOptions
+  | PartitionedCollectionSchemaOptions;
+
+export interface IndividualCollectionSchemaOptions extends SchemaOptions {
   /**
    * methods to generate for this collection
    */
@@ -56,6 +60,14 @@ export interface CollectionSchemaOptions extends SchemaOptions {
   useParentScope?: true;
 }
 
+export interface PartitionedCollectionSchemaOptions {
+  /**
+   * partition a collection into multiple virtual collections
+   * in the public api
+   */
+  partition: IndividualCollectionSchemaOptions[];
+}
+
 /**
  * container object for a generated Open API path
  */
@@ -63,7 +75,7 @@ export interface PathContainer {
   id: string;
   base: string;
   paths: {
-    route: string,
+    route: string;
     path: Path;
   }[];
 }

@@ -1,29 +1,18 @@
 {
   "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended"
-  ],
+  "extends": ["tslint:recommended"],
   "rules": {
-    "quotemark": [
-      "single"
-    ],
-    "no-console": [
-      false
-    ],
+    "quotemark": ["single"],
+    "no-console": [false],
     "no-any": false,
-    "semicolon": [
-      true
-    ],
-    "trailing-comma": [
-      false
-    ],
+    "semicolon": [true],
+    "trailing-comma": [false],
     "no-reference": false,
-    "interface-name": [
-      false
-    ],
+    "interface-name": [false],
     "object-literal-sort-keys": false,
     "curly": false,
     "arrow-parens": false,
-    "array-type": [ false ]
+    "array-type": [false],
+    "ordered-imports": [false]
   }
 }
