@@ -1,7 +1,7 @@
-"use strict";
 /**
  * query parameters for searching
  */
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SEARCH_STRING = {
     name: '$search',

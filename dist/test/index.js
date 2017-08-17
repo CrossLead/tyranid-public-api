@@ -17,18 +17,17 @@ const _1 = require("../");
  */
 ava_1.default.before((t) => __awaiter(this, void 0, void 0, function* () {
     yield tyranid_1.Tyr.config({
-        validate: [
-            { glob: path_1.join(__dirname, './models/*.js') },
-        ],
+        validate: [{ glob: path_1.join(__dirname, './models/*.js') }]
     });
     t.truthy(tyranid_1.Tyr.collections.length);
 }));
-ava_1.default('pascalCase should return correct values', (t) => {
+ava_1.default('pascalCase should return correct values', t => {
     t.is(_1.pascal('my short sentence'), 'MyShortSentence');
     t.is(_1.pascal('my_snake_sentence'), 'MySnakeSentence');
 });
 ava_1.default('should generate correct definition from schema', (t) => __awaiter(this, void 0, void 0, function* () {
-    const s = _1.schema(tyranid_1.Tyr.byName.metric.def);
+    const col = tyranid_1.Tyr.byName.metric;
+    const s = _1.schema(col.def, _1.options(col.def));
     t.deepEqual(s.pascalName, 'Metric');
 }));
 ava_1.default('should generate spec that passes validation', (t) => __awaiter(this, void 0, void 0, function* () {
@@ -41,5 +40,17 @@ ava_1.default('should generate spec that passes validation', (t) => __awaiter(th
 ava_1.default('pick should pick', t => {
     const obj = { a: 1, b: 2, c: 3 };
     t.deepEqual({ a: 1, b: 2 }, _1.pick(obj, ['a', 'b']));
+});
+ava_1.default('partitioning should function correctly', t => {
+    const s = _1.spec(tyranid_1.Tyr);
+    const { definitions } = s;
+    t.truthy(definitions.Plan, 'partitioned schemas should exist');
+    t.truthy(definitions.Task, 'partitioned schemas should exist');
+    t.truthy(definitions.Project, 'partitioned schemas should exist');
+    t.truthy(definitions.Plan.properties.planField, 'relevant fields on partitioned schemas should exist');
+    t.truthy(definitions.Plan.properties.nestedPartitionField, 'relevant fields on partitioned schemas should exist');
+    t.truthy(definitions.Project.properties.nestedPartitionField, 'relevant fields on partitioned schemas should exist');
+    t.falsy(definitions.Project.properties.planField, 'irrelevant fields on partitioned schemas should not exist');
+    t.pass();
 });
 //# sourceMappingURL=index.js.map

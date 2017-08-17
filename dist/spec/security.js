@@ -11,10 +11,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function createSecurityDefinitions(host, scopes) {
     return {
         default: {
-            type: "oauth2",
+            type: 'oauth2',
             authorizationUrl: `${host}/oauth2/authorize`,
             tokenUrl: `${host}/oauth2/token`,
-            flow: "accessCode",
+            flow: 'accessCode',
             scopes
         }
     };

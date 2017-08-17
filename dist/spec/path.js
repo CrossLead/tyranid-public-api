@@ -10,8 +10,7 @@ const MAX_ARRAY_ITEMS = 200;
  *
  * @param def a tyranid collection schema definition object
  */
-function path(def, lookup) {
-    const opts = utils_1.options(def);
+function path(def, opts, lookup) {
     const methods = new Set(opts.methods || ['all']);
     const includeMethod = (route) => methods.has(route) || methods.has('all');
     const schemaDef = lookup[def.id];
@@ -102,21 +101,14 @@ function path(def, lookup) {
     };
     const common = {
         ['x-tyranid-openapi-collection-id']: def.id,
-        tags: [
-            tag
-        ]
+        tags: [tag]
     };
     const returns = {
-        produces: [
-            'application/json'
-        ]
+        produces: ['application/json']
     };
     const parameters = (...params) => {
         return {
-            parameters: [
-                ...baseRouteParameters,
-                ...params
-            ]
+            parameters: [...baseRouteParameters, ...params]
         };
     };
     const addScopes = (scope) => {
@@ -165,9 +157,21 @@ function path(def, lookup) {
                     description: 'Parameter settings for next page of results',
                     properties: (() => {
                         const props = {
-                            $limit: utils_1.pick(baseParameters.LIMIT, ['type', 'description', 'default']),
-                            $skip: utils_1.pick(baseParameters.SKIP, ['type', 'description', 'default']),
-                            $sort: utils_1.pick(baseParameters.SORT, ['type', 'description', 'default'])
+                            $limit: utils_1.pick(baseParameters.LIMIT, [
+                                'type',
+                                'description',
+                                'default'
+                            ]),
+                            $skip: utils_1.pick(baseParameters.SKIP, [
+                                'type',
+                                'description',
+                                'default'
+                            ]),
+                            $sort: utils_1.pick(baseParameters.SORT, [
+                                'type',
+                                'description',
+                                'default'
+                            ])
                         };
                         props.$skip.default = props.$limit.default;
                         return props;
@@ -346,7 +350,7 @@ function success(description, schema, meta = {}) {
             description,
             schema: {
                 type: 'object',
-                properties: Object.assign({ status: { type: 'number', enum: [200] }, message: { type: 'string' } }, meta, (schema ? { data: schema } : {}))
+                properties: Object.assign({ status: { type: 'number', enum: [200] }, message: { type: 'string' } }, meta, schema ? { data: schema } : {})
             }
         }
     };
@@ -442,7 +446,8 @@ function filterSchemaForMethod(method, schema) {
             }
             return out;
         }
-        default: return schema;
+        default:
+            return schema;
     }
 }
 /**
@@ -453,7 +458,7 @@ function filterSchemaForMethod(method, schema) {
  */
 function includePropertyForMethod(method, schema) {
     const methods = schema['x-tyranid-openapi-methods'];
-    return !methods || (methods.indexOf(method) !== -1);
+    return !methods || methods.indexOf(method) !== -1;
 }
 /**
  * Return ref object for error

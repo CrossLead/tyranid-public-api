@@ -15,6 +15,6 @@ exports.default = new tyranid_1.Tyr.Collection({
         organizationId: { is: 'mongoid' },
         date: { is: 'date', openAPI: true },
         value: { is: 'double', openAPI: true }
-    },
+    }
 });
 //# sourceMappingURL=MetricObservation.js.map

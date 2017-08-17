@@ -8,15 +8,13 @@ const js_yaml_1 = require("js-yaml");
  * @param str string to convert to Pascal case
  */
 function pascal(str) {
-    const bits = str
-        .trim()
-        .replace(/[^a-zA-Z0-9]+/gm, '_')
-        .split('_');
+    const bits = str.trim().replace(/[^a-zA-Z0-9]+/gm, '_').split('_');
     let out = '';
     for (const bit of bits) {
-        out += bit.length < 2
-            ? (bit || '').toLocaleUpperCase()
-            : bit.charAt(0).toLocaleUpperCase() + bit.slice(1);
+        out +=
+            bit.length < 2
+                ? (bit || '').toLocaleUpperCase()
+                : bit.charAt(0).toLocaleUpperCase() + bit.slice(1);
     }
     return out;
 }

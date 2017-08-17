@@ -16,10 +16,13 @@ const PATH_MARKERS = {
  *
  * @param def a tyranid collection schema schema object
  */
-function schema(def) {
-    const opts = utils_1.options(def);
+function schema(def, opts) {
     const name = opts.name || def.name;
     const pascalName = utils_1.pascal(name);
+    let partitionName;
+    if (opts.partialFilterExpression) {
+        partitionName = opts.name;
+    }
     /**
      * add direct check for organizationId for now,
      * should have hook functions later
@@ -38,9 +41,14 @@ function schema(def) {
         schema: {
             ['x-tyranid-openapi-collection-id']: def.id,
             type: 'object',
-            properties: schemaObject(def.fields, def.name)
+            properties: schemaObject(def.fields, def.name, partitionName)
         }
     };
+    // if this is a partitioned collection...
+    if (opts.partialFilterExpression) {
+        out.schema['x-tyranid-openapi-partition-partial-filter-expression'] =
+            opts.partialFilterExpression;
+    }
     if (required.length) {
         out.schema.required = required;
     }
@@ -64,11 +72,13 @@ function extendPath(next, path) {
  * @param fields hash of tyranid field instances
  * @param path property path in schema of current field hash
  */
-function schemaObject(fields, path) {
+function schemaObject(fields, path, partitionName) {
     const properties = {};
     utils_1.each(fields, (field, name) => {
         const fieldOpts = utils_1.options(field.def);
-        const prop = schemaType(field, extendPath(name, path));
+        if (!matchesPartition(fieldOpts, partitionName))
+            return;
+        const prop = schemaType(field, extendPath(name, path), partitionName);
         const publicName = fieldOpts.name || name;
         if (prop)
             properties[publicName] = prop;
@@ -81,24 +91,20 @@ function schemaObject(fields, path) {
  * @param field tyranid schema field
  * @param path property path in schema of current field
  */
-function schemaType(field, path, includeOverride) {
+function schemaType(field, path, partitionName, includeOverride) {
     const isIDField = field.name === '_id';
     if (!isIDField && !include(field, path) && !includeOverride)
         return;
     const linkCollection = field.def.link && tyranid_1.Tyr.byName[field.def.link];
     // TODO: should links be refs?
-    const type = linkCollection
-        ? 'string'
-        : field.def.is;
+    const type = linkCollection ? 'string' : field.def.is;
     const opts = utils_1.options(field.def);
+    if (!matchesPartition(opts, partitionName))
+        return;
     const methods = new Set(Array.isArray(opts.include)
         ? opts.include
-        : (opts.include === 'read'
-            ? ['get']
-            : ['get', 'put', 'post', 'delete']));
-    const readOnly = (!methods.has('put') &&
-        !methods.has('post') &&
-        !methods.has('delete'));
+        : opts.include === 'read' ? ['get'] : ['get', 'put', 'post', 'delete']);
+    const readOnly = !methods.has('put') && !methods.has('post') && !methods.has('delete');
     const out = {
         ['x-tyranid-openapi-name-path']: field.namePath.name,
         ['x-tyranid-openapi-name']: field.name
@@ -143,7 +149,7 @@ function schemaType(field, path, includeOverride) {
           but missing an \`of\` property
         `);
             }
-            const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path), true);
+            const itemType = schemaType(element, extendPath(PATH_MARKERS.ARRAY, path), partitionName, true);
             if (itemType) {
                 Object.assign(out, {
                     type: 'array',
@@ -172,7 +178,7 @@ function schemaType(field, path, includeOverride) {
             property but no values property.
           `);
                 }
-                const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
+                const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path), partitionName);
                 if (subType)
                     out.additionalProperties = subType;
                 if (field.fields) {
@@ -189,7 +195,7 @@ function schemaType(field, path, includeOverride) {
                 return utils_1.error(`field "${path}" is of type \`object\` but
           has no \`fields\` property`);
             }
-            const subType = schemaObject(subfields, path);
+            const subType = schemaObject(subfields, path, partitionName);
             if (subType) {
                 out.properties = subType;
                 const requiredProps = getRequiredChildProps(field);
@@ -199,7 +205,8 @@ function schemaType(field, path, includeOverride) {
             }
             break;
         }
-        default: return utils_1.error(`field "${path}" is of unsupported type: ${type}`);
+        default:
+            return utils_1.error(`field "${path}" is of unsupported type: ${type}`);
     }
     /**
      * add formats
@@ -227,7 +234,7 @@ function schemaType(field, path, includeOverride) {
      * add note from schema
      */
     if (opts.note || field.def.note) {
-        out.description = (opts.note || field.def.note || '').replace(/\t+/mg, '');
+        out.description = (opts.note || field.def.note || '').replace(/\t+/gm, '');
     }
     /**
      * if property is link to enum collection,
@@ -259,8 +266,8 @@ function include(field, path) {
         return INCLUDE_CACHE[path];
     if ((field.fields && utils_1.each(field.fields, include)) ||
         (field.of && include(field.of, extendPath(name, path))) ||
-        (field.def.openAPI))
-        return INCLUDE_CACHE[path] = true;
+        field.def.openAPI)
+        return (INCLUDE_CACHE[path] = true);
     INCLUDE_CACHE[path] = false;
 }
 /**
@@ -275,10 +282,28 @@ function getRequiredChildProps(field) {
     utils_1.each(field.fields, (f, name) => {
         const opts = utils_1.options(f.def);
         const propName = opts.name || name;
-        if (f.def.openAPI && ('required' in opts ? opts.required : f.def.required)) {
+        if (f.def.openAPI &&
+            ('required' in opts ? opts.required : f.def.required)) {
             props.push(propName);
         }
     });
     return props;
+}
+/**
+ * check if this field should be included in the partition
+ *
+ * @param opts field schema options
+ * @param partition partition name (optional)
+ */
+function matchesPartition(opts, partition) {
+    const optPartition = opts.partition;
+    if (!partition || !optPartition)
+        return true;
+    if (Array.isArray(optPartition)) {
+        return optPartition.indexOf(partition) >= 0;
+    }
+    else {
+        return optPartition === partition;
+    }
 }
 //# sourceMappingURL=schema.js.map

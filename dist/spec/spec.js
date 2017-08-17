@@ -6,12 +6,10 @@ const path_1 = require("./path");
 const schema_1 = require("./schema");
 const security_1 = require("./security");
 function spec(Tyr, opts = {}) {
-    const { version = "1.0.0", description = "Public API generated from tyranid-open-api-spec", title = "Public API", host = "localhost:9000", basePath = '/', schemes = [
-        'https'
-    ] } = opts;
+    const { version = '1.0.0', description = 'Public API generated from tyranid-open-api-spec', title = 'Public API', host = 'localhost:9000', basePath = '/', schemes = ['https'] } = opts;
     const oauth2Scopes = {};
     const specObject = {
-        swagger: "2.0",
+        swagger: '2.0',
         info: {
             description,
             title,
@@ -25,18 +23,28 @@ function spec(Tyr, opts = {}) {
     };
     const lookup = {};
     const collections = Tyr.collections.filter(c => c.def.openAPI);
-    collections.sort((a, b) => {
-        const A = utils_1.options(a.def).name || a.def.name;
-        const B = utils_1.options(b.def).name || b.def.name;
-        return Number(A > B) - Number(A < B);
-    });
     /**
      * create Open API object schemas for relevant collections / properties
      */
-    collections.forEach(col => {
-        const result = schema_1.schema(col.def);
+    const specList = collections.reduce((out, col) => {
+        const virtualList = getIndividualOpts(col).map(individualOpts => {
+            const result = schema_1.schema(col.def, individualOpts);
+            return {
+                name: result.pascalName,
+                result,
+                schema: result.schema
+            };
+        });
+        return [...virtualList, ...out];
+    }, []);
+    /**
+     * sort results by public name
+     */
+    specList.sort(sortByName);
+    specList.forEach(item => {
+        const { result, name, schema } = item;
         lookup[result.id] = result;
-        specObject.definitions[result.pascalName] = result.schema;
+        specObject.definitions[name] = schema;
     });
     /**
      * add error refs
@@ -47,17 +55,29 @@ function spec(Tyr, opts = {}) {
     /**
      * create routes referencing relevant schema
      */
-    collections.forEach(col => {
-        const result = path_1.path(col.def, lookup);
-        const paths = result.paths;
+    const pathItems = collections.reduce((out, col) => {
+        getIndividualOpts(col).forEach(indOpts => {
+            const result = path_1.path(col.def, indOpts, lookup);
+            const paths = result.paths;
+            out.paths.push({ paths, name: utils_1.pascal(indOpts.name || col.def.name) });
+            if (!indOpts.parent || !indOpts.useParentScope) {
+                out.scopes.push(security_1.collectionScopes(result.base, lookup[result.id].name));
+            }
+        });
+        return out;
+    }, { paths: [], scopes: [] });
+    const { paths: pathsToAdd, scopes: scopesToAdd } = pathItems;
+    // sort paths by public name
+    pathsToAdd.sort(sortByName);
+    pathsToAdd.forEach(item => {
+        const { paths } = item;
         for (const p of paths) {
             specObject.paths[p.route] = p.path;
         }
-        const colOpts = utils_1.options(col.def);
-        if (!colOpts.parent || !colOpts.useParentScope) {
-            // add scopes for this collection
-            Object.assign(oauth2Scopes, security_1.collectionScopes(result.base, lookup[result.id].name));
-        }
+    });
+    scopesToAdd.forEach(scopes => {
+        // add scopes for this collection
+        Object.assign(oauth2Scopes, scopes);
     });
     const [scheme] = schemes;
     Object.assign(specObject, {
@@ -77,4 +97,41 @@ function spec(Tyr, opts = {}) {
     return opts.yaml ? utils_1.yaml(specObject) : specObject;
 }
 exports.spec = spec;
+/**
+ * get all virtual collection specs from a tyranid collection
+ *
+ * @param col tyranid collection
+ */
+function getIndividualOpts(col) {
+    const colOpts = utils_1.options(col.def);
+    if (isPartitionedOptions(colOpts)) {
+        const optList = colOpts.partition;
+        // validate that all partitions have a restriction query
+        optList.forEach(partition => {
+            if (!partition.name) {
+                throw new Error(`Partition has no name: ${JSON.stringify(partition, null, 2)}`);
+            }
+            if (!partition.partialFilterExpression) {
+                throw new Error(`Partition has no partialFilterExpression: ${JSON.stringify(partition, null, 2)}`);
+            }
+        });
+        return optList;
+    }
+    else {
+        return [colOpts];
+    }
+}
+/**
+ * Detect whether or not options from a schema contain a partition
+ *
+ * @param opts tyranid schema options for openapi
+ */
+function isPartitionedOptions(opts) {
+    return !!opts.partition;
+}
+function sortByName(a, b) {
+    const A = a.name;
+    const B = b.name;
+    return Number(A > B) - Number(A < B);
+}
 //# sourceMappingURL=spec.js.map

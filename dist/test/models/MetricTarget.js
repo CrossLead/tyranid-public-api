@@ -32,8 +32,9 @@ exports.default = new tyranid_1.Tyr.Collection({
         organizationId: { is: 'mongoid' },
         excludeProperty: { is: 'string' },
         type: {
-            link: 'metricTargetType', openAPI: true
+            link: 'metricTargetType',
+            openAPI: true
         }
-    },
+    }
 });
 //# sourceMappingURL=MetricTarget.js.map
