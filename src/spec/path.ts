@@ -2,6 +2,7 @@ import { Parameter, Path, Schema } from 'swagger-schema-official';
 import { Tyr } from 'tyranid';
 import {
   ExtendedSchema,
+  IndividualCollectionSchemaOptions,
   Method,
   PathContainer,
   SchemaContainer
@@ -21,9 +22,9 @@ const MAX_ARRAY_ITEMS = 200;
  */
 export function path(
   def: Tyr.CollectionDefinitionHydrated,
+  opts: IndividualCollectionSchemaOptions,
   lookup: { [key: string]: SchemaContainer }
 ): PathContainer {
-  const opts = options(def);
   const methods = new Set(opts.methods || ['all']);
   const includeMethod = (route: string) =>
     methods.has(route) || methods.has('all');

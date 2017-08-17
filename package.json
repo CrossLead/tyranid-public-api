@@ -13,12 +13,7 @@
     "lint": "tslint -c tslint.json './src/**/*.ts'",
     "prettier": "prettier --single-quote --write ./src/**/*.ts ./src/*.ts"
   },
-  "keywords": [
-    "tyranid",
-    "swagger",
-    "openapi",
-    "api"
-  ],
+  "keywords": ["tyranid", "swagger", "openapi", "api"],
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
@@ -38,12 +33,10 @@
     "prettier": "^1.5.3",
     "tslint": "5.1.0",
     "typedoc": "^0.7.1",
-    "typescript": "2.4.1",
+    "typescript": "2.4.2",
     "tyranid": "^0.2.2"
   },
   "ava": {
-    "files": [
-      "dist/test/index.js"
-    ]
+    "files": ["dist/test/index.js"]
   }
 }

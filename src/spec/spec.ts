@@ -6,8 +6,23 @@ import {
 } from 'swagger-schema-official';
 
 import { Tyr as Tyranid } from 'tyranid';
-import { ExtendedSchema, Options, SchemaContainer } from '../interfaces';
-import { each, error, options, pluralize, validate, yaml } from '../utils';
+import {
+  ExtendedSchema,
+  Options,
+  PartitionedCollectionSchemaOptions,
+  SchemaContainer,
+  SchemaOptions,
+  CollectionSchemaOptions
+} from '../interfaces';
+import {
+  each,
+  error,
+  options,
+  pascal,
+  pluralize,
+  validate,
+  yaml
+} from '../utils';
 import ErrorResponse from './error-schema';
 import { path } from './path';
 import { schema } from './schema';
@@ -57,20 +72,31 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   const lookup = {} as { [key: string]: SchemaContainer };
   const collections = Tyr.collections.filter(c => c.def.openAPI);
 
-  collections.sort((a, b) => {
-    const A = options(a.def).name || a.def.name;
-    const B = options(b.def).name || b.def.name;
-
-    return Number(A > B) - Number(A < B);
-  });
-
   /**
    * create Open API object schemas for relevant collections / properties
    */
-  collections.forEach(col => {
-    const result = schema(col.def);
+  const specList = collections.reduce((out, col) => {
+    const virtualList = getIndividualOpts(col).map(individualOpts => {
+      const result = schema(col.def, individualOpts);
+      return {
+        name: result.pascalName,
+        result,
+        schema: result.schema
+      };
+    });
+
+    return [...virtualList, ...out];
+  }, [] as { name: string; schema: ExtendedSchema; result: SchemaContainer }[]);
+
+  /**
+   * sort results by public name
+   */
+  specList.sort(sortByName);
+
+  specList.forEach(item => {
+    const { result, name, schema } = item;
     lookup[result.id] = result;
-    specObject.definitions[result.pascalName] = result.schema;
+    specObject.definitions[name] = schema;
   });
 
   /**
@@ -83,21 +109,44 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   /**
    * create routes referencing relevant schema
    */
-  collections.forEach(col => {
-    const result = path(col.def, lookup);
-    const paths = result.paths;
+  const pathItems = collections.reduce(
+    (out, col) => {
+      getIndividualOpts(col).forEach(indOpts => {
+        const result = path(col.def, indOpts, lookup);
+        const paths = result.paths;
+
+        out.paths.push({ paths, name: pascal(indOpts.name || col.def.name) });
+
+        if (!indOpts.parent || !indOpts.useParentScope) {
+          out.scopes.push(
+            collectionScopes(result.base, lookup[result.id].name)
+          );
+        }
+      });
+
+      return out;
+    },
+    { paths: [], scopes: [] } as {
+      paths: { paths: { route: string; path: Path }[]; name: string }[];
+      scopes: { [x: string]: string }[];
+    }
+  );
+
+  const { paths: pathsToAdd, scopes: scopesToAdd } = pathItems;
+
+  // sort paths by public name
+  pathsToAdd.sort(sortByName);
+
+  pathsToAdd.forEach(item => {
+    const { paths } = item;
     for (const p of paths) {
       specObject.paths[p.route] = p.path;
     }
+  });
 
-    const colOpts = options(col.def);
-    if (!colOpts.parent || !colOpts.useParentScope) {
-      // add scopes for this collection
-      Object.assign(
-        oauth2Scopes,
-        collectionScopes(result.base, lookup[result.id].name)
-      );
-    }
+  scopesToAdd.forEach(scopes => {
+    // add scopes for this collection
+    Object.assign(oauth2Scopes, scopes);
   });
 
   const [scheme] = schemes;
@@ -122,4 +171,57 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
   }
 
   return opts.yaml ? yaml(specObject) : specObject;
+}
+
+/**
+ * get all virtual collection specs from a tyranid collection
+ *
+ * @param col tyranid collection
+ */
+function getIndividualOpts(col: Tyranid.CollectionInstance) {
+  const colOpts = options(col.def);
+
+  if (isPartitionedOptions(colOpts)) {
+    const optList = colOpts.partition;
+
+    // validate that all partitions have a restriction query
+    optList.forEach(partition => {
+      if (!partition.name) {
+        throw new Error(
+          `Partition has no name: ${JSON.stringify(partition, null, 2)}`
+        );
+      }
+      if (!partition.partialFilterExpression) {
+        throw new Error(
+          `Partition has no partialFilterExpression: ${JSON.stringify(
+            partition,
+            null,
+            2
+          )}`
+        );
+      }
+    });
+
+    return optList;
+  } else {
+    return [colOpts];
+  }
+}
+
+/**
+ * Detect whether or not options from a schema contain a partition
+ *
+ * @param opts tyranid schema options for openapi
+ */
+function isPartitionedOptions(
+  opts: CollectionSchemaOptions
+): opts is PartitionedCollectionSchemaOptions {
+  return !!(opts as any).partition;
+}
+
+function sortByName(a: { name: string }, b: { name: string }) {
+  const A = a.name;
+  const B = b.name;
+
+  return Number(A > B) - Number(A < B);
 }

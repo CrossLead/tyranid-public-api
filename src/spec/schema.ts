@@ -1,5 +1,12 @@
 import { Tyr } from 'tyranid';
-import { ExtendedSchema, SchemaContainer, SchemaOptions } from '../interfaces';
+
+import {
+  ExtendedSchema,
+  FieldSchemaOptions,
+  IndividualCollectionSchemaOptions,
+  SchemaContainer,
+  SchemaOptions
+} from '../interfaces';
 import { each, error, options, pascal, upperSnake } from '../utils';
 
 /**
@@ -17,10 +24,17 @@ const PATH_MARKERS = {
  *
  * @param def a tyranid collection schema schema object
  */
-export function schema(def: Tyr.CollectionDefinitionHydrated) {
-  const opts = options(def);
+export function schema(
+  def: Tyr.CollectionDefinitionHydrated,
+  opts: IndividualCollectionSchemaOptions
+) {
   const name = opts.name || def.name;
   const pascalName = pascal(name);
+
+  let partitionName: string | undefined;
+  if (opts.partialFilterExpression) {
+    partitionName = opts.name;
+  }
 
   /**
    * add direct check for organizationId for now,
@@ -42,9 +56,15 @@ export function schema(def: Tyr.CollectionDefinitionHydrated) {
     schema: {
       ['x-tyranid-openapi-collection-id']: def.id,
       type: 'object',
-      properties: schemaObject(def.fields, def.name)
+      properties: schemaObject(def.fields, def.name, partitionName)
     } as {}
   };
+
+  // if this is a partitioned collection...
+  if (opts.partialFilterExpression) {
+    out.schema['x-tyranid-openapi-partition-partial-filter-expression'] =
+      opts.partialFilterExpression;
+  }
 
   if (required.length) {
     out.schema.required = required;
@@ -73,13 +93,17 @@ function extendPath(next: string, path?: string) {
  */
 function schemaObject(
   fields: { [key: string]: Tyr.FieldInstance },
-  path?: string
+  path?: string,
+  partitionName?: string
 ) {
   const properties: { [key: string]: ExtendedSchema } = {};
 
   each(fields, (field, name) => {
     const fieldOpts = options(field.def);
-    const prop = schemaType(field, extendPath(name, path));
+
+    if (!matchesPartition(fieldOpts, partitionName)) return;
+
+    const prop = schemaType(field, extendPath(name, path), partitionName);
     const publicName = fieldOpts.name || name;
     if (prop) properties[publicName] = prop;
   });
@@ -96,6 +120,7 @@ function schemaObject(
 function schemaType(
   field: Tyr.FieldInstance,
   path: string,
+  partitionName?: string,
   includeOverride?: boolean
 ) {
   const isIDField = field.name === '_id';
@@ -107,6 +132,7 @@ function schemaType(
   const type = linkCollection ? 'string' : field.def.is;
 
   const opts = options(field.def);
+  if (!matchesPartition(opts, partitionName)) return;
 
   const methods = new Set(
     Array.isArray(opts.include)
@@ -169,6 +195,7 @@ function schemaType(
       const itemType = schemaType(
         element,
         extendPath(PATH_MARKERS.ARRAY, path),
+        partitionName,
         true
       );
 
@@ -204,7 +231,11 @@ function schemaType(
           `);
         }
 
-        const subType = schemaType(values, extendPath(PATH_MARKERS.HASH, path));
+        const subType = schemaType(
+          values,
+          extendPath(PATH_MARKERS.HASH, path),
+          partitionName
+        );
 
         if (subType) out.additionalProperties = subType;
         if (field.fields) {
@@ -224,7 +255,7 @@ function schemaType(
         );
       }
 
-      const subType = schemaObject(subfields, path);
+      const subType = schemaObject(subfields, path, partitionName);
       if (subType) {
         out.properties = subType;
         const requiredProps = getRequiredChildProps(field);
@@ -342,4 +373,20 @@ function getRequiredChildProps(
   });
 
   return props;
+}
+
+/**
+ * check if this field should be included in the partition
+ *
+ * @param opts field schema options
+ * @param partition partition name (optional)
+ */
+function matchesPartition(opts: FieldSchemaOptions, partition?: string) {
+  const optPartition = opts.partition;
+  if (!partition || !optPartition) return true;
+  if (Array.isArray(optPartition)) {
+    return optPartition.indexOf(partition) >= 0;
+  } else {
+    return optPartition === partition;
+  }
 }
