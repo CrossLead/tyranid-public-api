@@ -10,8 +10,7 @@ const MAX_ARRAY_ITEMS = 200;
  *
  * @param def a tyranid collection schema definition object
  */
-function path(def, lookup) {
-    const opts = utils_1.options(def);
+function path(def, opts, lookup) {
     const methods = new Set(opts.methods || ['all']);
     const includeMethod = (route) => methods.has(route) || methods.has('all');
     const schemaDef = lookup[def.id];
