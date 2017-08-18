@@ -4,7 +4,8 @@ import { Tyr } from 'tyranid';
 import {
   CollectionSchemaOptions,
   FieldSchemaOptions,
-  SchemaOptions
+  SchemaOptions,
+  PartitionedCollectionSchemaOptions
 } from './interfaces';
 
 import { Parameter, Schema, Spec } from 'swagger-schema-official';
@@ -131,4 +132,22 @@ export function upperSnake(str: string) {
  */
 export function pluralize(str: string) {
   return str.endsWith('s') ? str : str + 's';
+}
+
+/**
+ * Detect whether or not options from a schema contain a partition
+ *
+ * @param opts tyranid schema options for openapi
+ */
+export function isPartitionedOptions(
+  opts: CollectionSchemaOptions
+): opts is PartitionedCollectionSchemaOptions {
+  return !!(opts as any).partition;
+}
+
+export function sortByName(a: { name: string }, b: { name: string }) {
+  const A = a.name;
+  const B = b.name;
+
+  return Number(A > B) - Number(A < B);
 }
