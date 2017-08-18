@@ -9,8 +9,8 @@ This project provides a way to generate a complete + valid [openAPI spec](https:
 **NOTE**: this library only creates the spec itself, implementation is left to the app code for now (but might be a good feature for this library later on).
 
 ## Contents
-
 - [Schema Options](#schema-options)
+- [Generating the spec](#generating-the-spec)
 - [Exposing a single collection](#exposing-a-single-collection)
 - ["Parent" collections](#parent-collections)
 - [Renaming and Restricting certain properties](#renaming-and-restricting-certain-properties)
@@ -20,6 +20,31 @@ This project provides a way to generate a complete + valid [openAPI spec](https:
 ## Schema Options
 
 There are various options for configuring how the tyranid models appear to the public api. You can see the `CollectionSchemaOptions` (specified in as an object on the schema definition named `openAPI`) and `FieldSchemaOptions` (specified on specific fields in the schema as a property named `openAPI`) interfaces in [`./src/interfaces.ts`](./src/interfaces.ts).
+
+## Generating the Spec
+
+Once you have specified some collections to be exposed by annotating the schemas, you can generate the actual spec file as follows...
+
+```typescript
+import { Tyr } from 'tyranid';
+import { spec } from 'tyranid-openapi';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
+
+// async function for bootstrap
+(async () => {
+  // bootstrapping without db to just get schema graph
+  await Tyr.config({
+    validate: [{ glob: join(__dirname, './models/*.js') }]
+  });
+
+  // generate yaml openAPI spec string
+  const specString = spec(Tyr, { yaml: true });
+
+  // write out to file
+  writeFileSync(join(__dirname, './my-api.yaml'), specString);
+})().catch(console.error);
+```
 
 ## Exposing a single collection
 
