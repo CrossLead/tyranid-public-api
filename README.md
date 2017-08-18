@@ -8,6 +8,10 @@ This project provides a way to generate a complete + valid [openAPI spec](https:
 
 **NOTE**: this library only creates the spec itself, implementation is left to the app code for now (but might be a good feature for this library later on).
 
+## Schema Options
+
+There are various options for configuring how the tyranid models appear to the public api. You can see the `CollectionSchemaOptions` (specified in as an object on the schema definition named `openAPI`) and `FieldSchemaOptions` (specified on specific fields in the schema as a property named `openAPI`) interfaces in [`./src/interfaces.ts`](./src/interfaces.ts).
+
 ## Exposing a single collection
 
 The most basic way to expose a collection to the public api is by setting the `openAPI` flag to `true`, and marking a few properties to show. For example...
@@ -102,3 +106,74 @@ export default new Tyr.Collection({
 ```
 
 ## Partitioning a collection into multiple "virtual" collections
+
+If there is a single database collection which represents several distinct types of data which you wish to expose in different endpoints, you can "partition" the collection...
+
+```typescript
+import { Tyr } from 'tyranid';
+
+export default new Tyr.Collection({
+  id: 'i01',
+  name: 'item',
+  dbName: 'items',
+  openAPI: {
+    // this will create two new types for the api:  `Plan` + `Task` + `Project`,
+    // with `/task`, `/project`, and `/plan` endpoints, etc...
+    partition: [
+      {
+        name: 'plan',
+        // here we define a mongodb query to separate the
+        // data into their specific partitions
+        partialFilterExpression: {
+          kind: 'plan'
+        }
+      },
+      {
+        name: 'task',
+        partialFilterExpression: {
+          kind: 'task'
+        }
+      },
+      {
+        name: 'project',
+        partialFilterExpression: {
+          kind: 'project'
+        }
+      }
+    ]
+  },
+  fields: {
+    _id: { is: 'mongoid' },
+    organizationId: { is: 'mongoid' },
+    name: { is: 'string', openAPI: true, required: true },
+    kind: { is: 'string' },
+    planField: {
+      is: 'string',
+      openAPI: {
+        // we might want some fields to only appear on
+        // certain partitions (can also be an array of partitions)
+        partition: 'plan'
+      }
+    },
+    taskField: {
+      is: 'string',
+      openAPI: {
+        partition: 'task'
+      }
+    },
+    nestedPartitionField: {
+      is: 'object',
+      fields: {
+        innerPlanOrProjectField: {
+          is: 'string',
+          openAPI: {
+            partition: ['plan', 'project'],
+            name: 'renamedPartitionField'
+          }
+        },
+        innerTaskField: { is: 'string', openAPI: { partition: 'task' } }
+      }
+    }
+  }
+});
+```
