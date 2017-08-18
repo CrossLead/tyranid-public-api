@@ -7,7 +7,15 @@ import {
   SchemaContainer,
   IndividualCollectionSchemaOptions
 } from '../interfaces';
-import { each, error, options, pascal, pick, pluralize } from '../utils';
+import {
+  each,
+  error,
+  options,
+  pascal,
+  pick,
+  pluralize,
+  isPartitionedOptions
+} from '../utils';
 import * as baseParameters from './base-find-parameters';
 import ErrorResponse from './error-schema';
 import { createScope, requireScopes } from './security';
@@ -28,7 +36,8 @@ export function path(
   const methods = new Set(opts.methods || ['all']);
   const includeMethod = (route: string) =>
     methods.has(route) || methods.has('all');
-  const schemaDef = lookup[def.id];
+  const lookupName = pascal(opts.name || def.name);
+  const schemaDef = lookup[lookupName];
   const baseCollectionName = pluralize(schemaDef.name);
   const baseRouteParameters: Parameter[] = [];
 
@@ -71,7 +80,14 @@ export function path(
     }
 
     const parentId = parentField.field.link!.def.id;
-    const parentDef = lookup[parentId];
+    const parentColDef = Tyr.byId[parentId].def;
+    const parentOpts = options(parentColDef);
+    if (isPartitionedOptions(parentOpts)) {
+      throw new Error(`Can't have a partitioned collection as parent`);
+    }
+    const parentName = pascal(parentOpts.name || parentColDef.name);
+
+    const parentDef = lookup[parentName];
     if (!parentDef) {
       return error(`
         parent collection (${parentField.field.link!.def.name})

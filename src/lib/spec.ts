@@ -20,7 +20,9 @@ import {
   pluralize,
   validate,
   yaml,
-  pascal
+  pascal,
+  sortByName,
+  isPartitionedOptions
 } from '../utils';
 import ErrorResponse from './error-schema';
 import { path } from './path';
@@ -94,7 +96,7 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
 
   specList.forEach(item => {
     const { result, name, schema } = item;
-    lookup[result.id] = result;
+    lookup[name] = result;
     specObject.definitions[name] = schema;
   });
 
@@ -113,13 +115,12 @@ export function spec(Tyr: typeof Tyranid, opts: Options = {}): Spec | string {
       getIndividualOpts(col).forEach(indOpts => {
         const result = path(col.def, indOpts, lookup);
         const paths = result.paths;
+        const name = pascal(indOpts.name || col.def.name);
 
-        out.paths.push({ paths, name: pascal(indOpts.name || col.def.name) });
+        out.paths.push({ paths, name });
 
         if (!indOpts.parent || !indOpts.useParentScope) {
-          out.scopes.push(
-            collectionScopes(result.base, lookup[result.id].name)
-          );
+          out.scopes.push(collectionScopes(result.base, lookup[name].name));
         }
       });
 
@@ -205,22 +206,4 @@ function getIndividualOpts(col: Tyranid.GenericCollection) {
   } else {
     return [colOpts];
   }
-}
-
-/**
- * Detect whether or not options from a schema contain a partition
- *
- * @param opts tyranid schema options for openapi
- */
-function isPartitionedOptions(
-  opts: SchemaOptions
-): opts is PartitionedCollectionSchemaOptions {
-  return !!(opts as any).partition;
-}
-
-function sortByName(a: { name: string }, b: { name: string }) {
-  const A = a.name;
-  const B = b.name;
-
-  return Number(A > B) - Number(A < B);
 }
