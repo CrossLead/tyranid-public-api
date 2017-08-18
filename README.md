@@ -8,6 +8,15 @@ This project provides a way to generate a complete + valid [openAPI spec](https:
 
 **NOTE**: this library only creates the spec itself, implementation is left to the app code for now (but might be a good feature for this library later on).
 
+## Contents
+
+- [Schema Options](#schema-options)
+- [Exposing a single collection](#exposing-a-single-collection)
+- ["Parent" collections](#parent-collections)
+- [Renaming and Restricting certain properties](#renaming-and-restricting-certain-properties)
+- [Partitioning a collection into multiple "virtual" collections](#partitioning-a-collection-into-multiple-virtual-collections)
+
+
 ## Schema Options
 
 There are various options for configuring how the tyranid models appear to the public api. You can see the `CollectionSchemaOptions` (specified in as an object on the schema definition named `openAPI`) and `FieldSchemaOptions` (specified on specific fields in the schema as a property named `openAPI`) interfaces in [`./src/interfaces.ts`](./src/interfaces.ts).
