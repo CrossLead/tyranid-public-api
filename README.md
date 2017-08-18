@@ -6,3 +6,12 @@
 
 This project provides a way to generate a complete + valid openAPI spec by adding schema annotations to your [tyranid](http://tyranid.org/) models.
 
+**NOTE**: this library only creates the spec itself, implementation is left to the app code for now (but might be a good feature for this library later on).
+
+## Exposing a single collection
+
+## Setting a status flag to track deletions
+
+## Restricting certain properties to show for certain methods
+
+## Partitioning a collection into multiple "virtual" collections
