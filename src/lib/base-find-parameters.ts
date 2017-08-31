@@ -15,6 +15,19 @@ can be specified using dot syntax (for example: \`?$search=info.nested.name:ben\
   `.trim()
 };
 
+export const WHERE = {
+  name: '$where',
+  in: 'query',
+  type: 'string',
+  description: `
+Match a property against a value.  This will work with enumerations.
+
+For example \`?$where=:layerType:tasks\`
+searches the \`layerType\` property for the value \`tasks\`. Nested properties
+can be specified using dot syntax (for example: \`?$search=info.nested.name:ben\`)
+  `.trim()
+};
+
 export const MIN_DATE = {
   name: '$minDate',
   in: 'query',
@@ -76,6 +89,7 @@ export const ASCEND = {
 
 export const DEFAULT_PARAMETERS = [
   SEARCH_STRING,
+  WHERE,
   MIN_DATE,
   MAX_DATE,
   LIMIT,
