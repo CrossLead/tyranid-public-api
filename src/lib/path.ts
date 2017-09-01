@@ -612,8 +612,15 @@ function makeOptional(schemaHash: { [key: string]: Schema }) {
       out[key].properties = makeOptional(props);
     }
     if (items) {
-      const { filteredItems } = makeOptional({ filteredItems: items });
-      out[key].items = filteredItems;
+      if (Array.isArray(items)) {
+        out[key].items = items.map(item => {
+          const { filteredItem } = makeOptional({ filteredItem: item });
+          return filteredItem;
+        });
+      } else {
+        const { filteredItems } = makeOptional({ filteredItems: items });
+        out[key].items = filteredItems;
+      }
     }
   }
 
@@ -634,7 +641,10 @@ function filterSchemaForMethod(
 
   switch (schema.type) {
     case 'array': {
-      const filtered = filterSchemaForMethod(method, schema.items!);
+      const items = schema.items!;
+      const filtered = Array.isArray(items)
+        ? items.map(item => filterSchemaForMethod(method, item))
+        : filterSchemaForMethod(method, items);
       if (filtered) {
         const updated = {
           ...schema,
