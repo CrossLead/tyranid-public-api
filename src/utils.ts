@@ -74,7 +74,9 @@ export function options(
   def: Tyr.CollectionDefinitionHydrated
 ): CollectionSchemaOptions;
 export function options(def: Tyr.FieldDefinition): FieldSchemaOptions;
-export function options(def: { openAPI?: SchemaOptions | boolean }) {
+export function options(def: {
+  openAPI?: CollectionSchemaOptions | FieldSchemaOptions | boolean;
+}) {
   const openAPI = def.openAPI;
   const opts = (typeof openAPI === 'object' && openAPI) || {};
 
