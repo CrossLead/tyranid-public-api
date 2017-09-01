@@ -1,6 +1,6 @@
 {
   "name": "tyranid-openapi",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Open API spec and express app generator for tyranid",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -14,7 +14,12 @@
     "prettier": "prettier --single-quote --write ./src/**/*.ts ./src/*.ts",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
-  "keywords": ["tyranid", "swagger", "openapi", "api"],
+  "keywords": [
+    "tyranid",
+    "swagger",
+    "openapi",
+    "api"
+  ],
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
@@ -40,9 +45,13 @@
     "tyranid": "^0.2.2"
   },
   "ava": {
-    "files": ["dist/test/index.js"]
+    "files": [
+      "dist/test/index.js"
+    ]
   },
   "nyc": {
-    "include": ["dist/lib"]
+    "include": [
+      "dist/lib"
+    ]
   }
 }
