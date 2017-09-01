@@ -156,7 +156,8 @@ export function path(
   const common = {
     ['x-tyranid-openapi-collection-id']: def.id,
     tags: [tag]
-  };
+    // https://github.com/CrossLead/tyranid-openapi/issues/17
+  } as any; // TODO: hack for typings for now
 
   const returns = {
     produces: ['application/json']
@@ -577,8 +578,15 @@ function filterNotReadOnly(schemaHash: { [key: string]: Schema }) {
         out[key].properties = filterNotReadOnly(props);
       }
       if (items) {
-        const { filteredItems } = filterNotReadOnly({ filteredItems: items });
-        out[key].items = filteredItems;
+        if (Array.isArray(items)) {
+          out[key].items = items.map(item => {
+            const { filteredItem } = filterNotReadOnly({ filteredItem: item });
+            return filteredItem;
+          });
+        } else {
+          const { filteredItems } = filterNotReadOnly({ filteredItems: items });
+          out[key].items = filteredItems;
+        }
       }
     }
   }
