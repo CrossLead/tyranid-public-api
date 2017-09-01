@@ -14,16 +14,11 @@
     "prettier": "prettier --single-quote --write ./src/**/*.ts ./src/*.ts",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
-  "keywords": [
-    "tyranid",
-    "swagger",
-    "openapi",
-    "api"
-  ],
+  "keywords": ["tyranid", "swagger", "openapi", "api"],
   "author": "bsouthga@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "@types/swagger-schema-official": "^2.0.4",
+    "@types/swagger-schema-official": "^2.0.6",
     "ajv": "^5.0.1",
     "js-yaml": "^3.8.3",
     "swagger-schema-official": "^2.0.0-bab6bed"
@@ -45,13 +40,9 @@
     "tyranid": "^0.2.2"
   },
   "ava": {
-    "files": [
-      "dist/test/index.js"
-    ]
+    "files": ["dist/test/index.js"]
   },
   "nyc": {
-    "include": [
-      "dist/lib"
-    ]
+    "include": ["dist/lib"]
   }
 }

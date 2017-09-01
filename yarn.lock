@@ -122,9 +122,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/swagger-schema-official@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.4.tgz#86e2207ea46a509dc50f7c7cebb324cb4f2a3b8c"
+"@types/swagger-schema-official@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.6.tgz#d2ca46728e32004a16e8c6c7fc8305b7cedf31b5"
 
 abbrev@1:
   version "1.1.0"
