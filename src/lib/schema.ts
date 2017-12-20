@@ -7,7 +7,7 @@ import {
   SchemaContainer,
   SchemaOptions
 } from '../interfaces';
-import { each, error, options, pascal, upperSnake } from '../utils';
+import { each, error, options, pascal, upperSnake, someOf } from '../utils';
 
 /**
  * strings for elements in property path
@@ -341,19 +341,14 @@ export function include(field: Tyr.FieldInstance, path: string) {
 
   if (
     (field.fields &&
-      Object.keys(field.fields).reduce((prev, key) => {
-        return (
-          (!!field.fields &&
-            !!include(field.fields[key], extendPath(key, path))) ||
-          prev
-        );
-      }, false)) ||
+      someOf(field.fields, (f, n) => include(f, extendPath(n, path)))) ||
     (field.of && include(field.of, extendPath(name, path))) ||
     field.def.openAPI
-  )
+  ) {
     return (INCLUDE_CACHE[path] = true);
+  }
 
-  INCLUDE_CACHE[path] = false;
+  return (INCLUDE_CACHE[path] = false);
 }
 
 /**
