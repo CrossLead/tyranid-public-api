@@ -48,6 +48,14 @@ export function yaml(obj: object) {
 }
 
 /**
+ * return if value is defined
+ *
+ * @param val
+ */
+const returnOnDefined = <S>(val: S | undefined): val is S =>
+  typeof val !== 'undefined';
+
+/**
  * Iterate over properties in object
  *
  * @param obj javascript object
@@ -55,15 +63,34 @@ export function yaml(obj: object) {
  */
 export function each<T, S>(
   obj: { [key: string]: T },
-  fn: (element: T, field: string) => S
+  fn: (element: T, field: string) => S,
+  returnPredicate: (val: S) => boolean = returnOnDefined
 ) {
   for (const field in obj) {
     if (obj.hasOwnProperty(field)) {
       const result = fn(obj[field], field);
-      if (typeof result !== 'undefined') return result;
+      if (returnPredicate(result)) return result;
     }
   }
 }
+
+/**
+ * return if value is true
+ *
+ * @param val
+ */
+const returnOnTrue = (val: boolean | undefined): val is true => val === true;
+
+/**
+ * map over obj, short on true
+ *
+ * @param obj
+ * @param fn
+ */
+export const someOf = <T>(
+  obj: { [key: string]: T },
+  fn: (element: T, field: string) => boolean | undefined
+) => each<T, boolean | undefined>(obj, fn, returnOnTrue);
 
 /**
  * Get options from schema

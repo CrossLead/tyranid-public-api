@@ -7,7 +7,7 @@ import {
   SchemaContainer,
   SchemaOptions
 } from '../interfaces';
-import { each, error, options, pascal, upperSnake } from '../utils';
+import { each, error, options, pascal, upperSnake, someOf } from '../utils';
 
 /**
  * strings for elements in property path
@@ -334,19 +334,21 @@ const INCLUDE_CACHE = {} as { [key: string]: boolean };
  *
  * @param field tyranid field instance
  */
-function include(field: Tyr.FieldInstance, path: string) {
+export function include(field: Tyr.FieldInstance, path: string) {
   const name = field.name;
 
   if (path in INCLUDE_CACHE) return INCLUDE_CACHE[path];
 
   if (
-    (field.fields && each(field.fields, include)) ||
+    (field.fields &&
+      someOf(field.fields, (f, n) => include(f, extendPath(n, path)))) ||
     (field.of && include(field.of, extendPath(name, path))) ||
     field.def.openAPI
-  )
+  ) {
     return (INCLUDE_CACHE[path] = true);
+  }
 
-  INCLUDE_CACHE[path] = false;
+  return (INCLUDE_CACHE[path] = false);
 }
 
 /**

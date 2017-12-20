@@ -13,6 +13,24 @@ export default new Tyr.Collection({
     metricId: { link: 'metric', openAPI: true },
     organizationId: { is: 'mongoid' },
     date: { is: 'date', openAPI: true },
-    value: { is: 'double', openAPI: true }
-  },
+    value: { is: 'double', openAPI: true },
+    nested1: {
+      is: 'object',
+      fields: {
+        hidden: {
+          is: 'boolean'
+        }
+      }
+    },
+    nested2: {
+      is: 'object',
+      fields: {
+        notApiField: { is: 'string' },
+        hidden: {
+          is: 'boolean',
+          openAPI: true
+        }
+      }
+    }
+  }
 });
