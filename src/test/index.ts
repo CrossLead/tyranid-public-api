@@ -2,7 +2,17 @@ import test from 'ava';
 import { join } from 'path';
 import { Tyr } from 'tyranid';
 
-import { options, pascal, path, pick, schema, spec, validate, yaml } from '../';
+import {
+  include,
+  options,
+  pascal,
+  path,
+  pick,
+  schema,
+  spec,
+  validate,
+  yaml
+} from '../';
 
 /**
  * boot tyranid without db
@@ -13,10 +23,22 @@ test.before(async t => {
   });
   t.truthy(Tyr.collections.length);
 });
+// TODO: blow away INCLUDE_CACHE before each test
 
 test('pascalCase should return correct values', t => {
   t.is(pascal('my short sentence'), 'MyShortSentence');
   t.is(pascal('my_snake_sentence'), 'MySnakeSentence');
+});
+
+test('should not exclude nested fields if first field not openAPI', async t => {
+  const col = Tyr.byName.metricObservation;
+  t.truthy(include(col.fields.nested2, `${col.name}.nested2`));
+});
+
+test('should not exclude nested fields with the same name', async t => {
+  const col = Tyr.byName.metricObservation;
+  t.falsy(include(col.fields.nested1, `${col.name}.nested1`));
+  t.truthy(include(col.fields.nested2, `${col.name}.nested2`));
 });
 
 test('should generate correct definition from schema', async t => {

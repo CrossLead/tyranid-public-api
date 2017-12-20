@@ -9,5 +9,5 @@ export default new Tyr.Collection({
     _id: { is: 'mongoid' },
     organizationId: { is: 'mongoid' },
     name: { is: 'string', openAPI: true, required: true }
-  },
+  }
 });
