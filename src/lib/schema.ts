@@ -343,9 +343,9 @@ export function include(field: Tyr.FieldInstance, path: string) {
     (field.fields &&
       Object.keys(field.fields).reduce((prev, key) => {
         return (
-          prev ||
           (!!field.fields &&
-            !!include(field.fields[key], extendPath(key, path)))
+            !!include(field.fields[key], extendPath(key, path))) ||
+          prev
         );
       }, false)) ||
     (field.of && include(field.of, extendPath(name, path))) ||
