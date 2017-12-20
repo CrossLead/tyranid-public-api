@@ -334,13 +334,20 @@ const INCLUDE_CACHE = {} as { [key: string]: boolean };
  *
  * @param field tyranid field instance
  */
-function include(field: Tyr.FieldInstance, path: string) {
+export function include(field: Tyr.FieldInstance, path: string) {
   const name = field.name;
 
   if (path in INCLUDE_CACHE) return INCLUDE_CACHE[path];
 
   if (
-    (field.fields && each(field.fields, include)) ||
+    (field.fields &&
+      Object.keys(field.fields).reduce((prev, key) => {
+        return (
+          prev ||
+          (!!field.fields &&
+            !!include(field.fields[key], extendPath(key, path)))
+        );
+      }, false)) ||
     (field.of && include(field.of, extendPath(name, path))) ||
     field.def.openAPI
   )
